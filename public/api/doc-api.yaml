@@ -1,0 +1,523 @@
+openapi: 3.0.0
+info:
+  title: API Mobile CDS49
+  version: v1.0.0
+  description: Documentation de l'API mobile pour l'application CDS49.
+
+servers:
+  - url: http://localhost:9000/api
+    description: Serveur de développement local
+  - url: http://frontap3.dombtsig.local/api
+    description: Serveur de démonstration
+
+components:
+  schemas:
+    User:
+      type: object
+      description: Informations sur l'élève.
+      properties:
+        ideleve: # Correspond au champ retourné par EleveModel
+          type: integer
+          description: Identifiant unique de l'élève.
+          example: 1
+        nomeleve: # Correspond au champ retourné par EleveModel
+          type: string
+          description: Nom de l'élève.
+          example: "Dupont"
+        prenomeleve: # Correspond au champ retourné par EleveModel
+          type: string
+          description: Prénom de l'élève.
+          example: "Jean"
+        emaileleve: # Correspond au champ retourné par EleveModel
+          type: string
+          format: email
+          description: Adresse e-mail de l'élève.
+          example: "jean.dupont@example.com"
+        datenaissanceeleve: # Correspond au champ retourné par EleveModel
+          type: string
+          format: date
+          description: Date de naissance de l'élève.
+          example: "2005-06-15"
+
+    Question:
+      type: object
+      description: Informations sur une question.
+      properties:
+        idquestion:
+          type: integer
+          description: Identifiant unique de la question.
+          example: 101
+        libellequestion: # Correspond au champ de QuestionModel
+          type: string
+          description: Le texte de la question.
+          example: "Quelle est la capitale de la France ?"
+        imagequestion: # Correspond au champ de QuestionModel
+          type: string
+          nullable: true
+          description: Nom du fichier image ou URL de l'image pour la question.
+          example: "tour_eiffel.jpg"
+
+    Reponse:
+      type: object
+      description: Informations sur une réponse à une question.
+      properties:
+        idquestion:
+          type: integer
+          description: Identifiant de la question à laquelle cette réponse est associée.
+          example: 101
+        numreponse:
+          type: integer
+          description: Numéro d'ordre de la réponse pour cette question.
+          example: 1
+        libellereponse: # Correspond au champ de ReponseModel
+          type: string
+          description: Le texte de la réponse.
+          example: "Paris"
+        valide: # Correspond au champ 'valide' de ReponseModel, interprété comme booléen
+          type: boolean
+          description: Indique si la réponse est correcte.
+          example: true
+
+    LoginSuccessResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Connexion réussie"
+        data:
+          type: object
+          properties:
+            user:
+              $ref: "#/components/schemas/User"
+            token:
+              type: string
+              description: Token d'authentification à utiliser pour les requêtes protégées.
+              example: "abcdef1234567890abcdef1234567890"
+
+    GeneralSuccessResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+        data:
+          oneOf:
+            - type: object
+            - type: array
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+      required:
+        - status
+        - message
+
+  requestBodies:
+    LoginRequest:
+      description: Données de connexion de l'utilisateur.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+                description: Adresse e-mail de l'utilisateur.
+              password:
+                type: string
+                format: password
+                description: Mot de passe de l'utilisateur.
+            required:
+              - email
+              - password
+    UpdateProfileRequest:
+      description: Informations du profil à mettre à jour.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              nom:
+                type: string
+                description: Nom de l'utilisateur.
+              prenom:
+                type: string
+                description: Prénom de l'utilisateur.
+              email:
+                type: string
+                format: email
+                description: Nouvelle adresse e-mail de l'utilisateur.
+              datenaissance:
+                type: string
+                format: date
+                description: Date de naissance de l'utilisateur (YYYY-MM-DD).
+            required:
+              - nom
+              - prenom
+              - email
+              - datenaissance
+    SaveScoreRequest:
+      description: Données pour la sauvegarde du score.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              score:
+                type: integer
+                description: Le score obtenu par l'élève.
+                example: 35
+              nbquestions:
+                type: integer
+                description: Le nombre total de questions dans le test.
+                example: 40
+            required:
+              - score
+              - nbquestions
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: "Token d'authentification de type Bearer. Le token est obtenu lors de la connexion. Fournir le token dans l'en-tête 'Authorization' avec le préfixe 'Bearer '. Exemple: 'Authorization: Bearer {token}'"
+      bearerFormat: "opaque"
+
+paths:
+  /login:
+    post:
+      summary: Connexion d'un utilisateur
+      description: Permet à un utilisateur (élève) de se connecter en fournissant son email et mot de passe. Retourne les informations de l'utilisateur et un token d'authentification.
+      tags:
+        - Authentification
+      requestBody:
+        $ref: "#/components/requestBodies/LoginRequest"
+      responses:
+        "200":
+          description: Connexion réussie.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginSuccessResponse"
+        "400":
+          description: Données manquantes. Email et mot de passe sont requis.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingCredentials:
+                  value:
+                    status: 400
+                    message: "Email et mot de passe requis"
+        "401":
+          description: Identifiants invalides.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidCredentials:
+                  value:
+                    status: 401
+                    message: "Identifiants invalides"
+        "405":
+          description: Méthode non autorisée. Seule la méthode POST est acceptée.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                methodNotAllowed:
+                  value:
+                    status: 405
+                    message: "Méthode non autorisée"
+
+  /profile/get:
+    get:
+      summary: Récupérer le profil utilisateur
+      description: |
+        Permet à un utilisateur authentifié de récupérer ses informations de profil.
+        Le token obtenu lors de la connexion doit être fourni dans l'en-tête `Authorization` sous la forme `Bearer {token}`.
+      tags:
+        - Utilisateur
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Informations utilisateur récupérées avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Informations utilisateur récupérées avec succès"
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: "#/components/schemas/User"
+        "401":
+          description: Non autorisé. Le token d'authentification est manquant ou invalide.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                unauthorized:
+                  value:
+                    status: 401
+                    message: "Token requis"
+        "404":
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                userNotFound:
+                  value:
+                    status: 404
+                    message: "Utilisateur non trouvé"
+        "405":
+          description: Méthode non autorisée.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                methodNotAllowed:
+                  value:
+                    status: 405
+                    message: "Méthode non autorisée"
+
+  /profile/update: # Anciennement /profile
+    post:
+      summary: Mettre à jour le profil utilisateur
+      description: |
+        Permet à un utilisateur authentifié de mettre à jour ses informations de profil.
+        Le token obtenu lors de la connexion doit être fourni dans l'en-tête `Authorization` sous la forme `Bearer {token}`.
+        Le contrôleur extrait maintenant correctement le token de cet en-tête pour authentifier la requête.
+      tags:
+        - Utilisateur
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateProfileRequest"
+      responses:
+        "200":
+          description: Informations mises à jour avec succès.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneralSuccessResponse"
+              examples:
+                profileUpdated:
+                  value:
+                    status: 200
+                    message: "Informations mises à jour avec succès"
+                    data: null
+        "400":
+          description: Tous les champs requis (nom, prenom, email, datenaissance) ne sont pas fournis.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingFields:
+                  value:
+                    status: 400
+                    message: "Tous les champs sont requis"
+        "401":
+          description: Non autorisé. Le token d'authentification est manquant ou invalide.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                unauthorized:
+                  value:
+                    status: 401
+                    message: "Token requis"
+        "405":
+          description: Méthode non autorisée. Seule la méthode POST est acceptée.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                methodNotAllowed:
+                  value:
+                    status: 405
+                    message: "Méthode non autorisée"
+        "500":
+          description: Échec de la mise à jour des informations. Cela peut se produire si le token est invalide, si l'utilisateur associé au token n'est pas trouvé, ou en cas d'autre erreur serveur.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                updateFailed:
+                  value:
+                    status: 500
+                    message: "Échec de la mise à jour des informations"
+
+  /questions/{n}:
+    get:
+      summary: Récupérer un nombre N de questions
+      description: Retourne un nombre spécifié de questions avec leurs réponses associées. Par défaut, les questions sont aléatoires.
+      tags:
+        - Questions
+      parameters:
+        - name: n
+          in: path
+          required: true
+          description: Le nombre de questions à récupérer.
+          schema:
+            type: integer
+            default: 40
+            minimum: 1
+        - name: categorie
+          in: query
+          required: false
+          description: |-
+            Permet de filtrer les questions par catégorie.
+            Si non spécifié ou si la valeur est "random", des questions aléatoires seront retournées.
+            *Note: Actuellement, seule la valeur "random" (ou l'absence de ce paramètre) est pleinement fonctionnelle pour retourner des questions aléatoires. Le filtrage par catégories spécifiques n'est pas encore implémenté.*
+          schema:
+            type: string
+            example: "random"
+      responses:
+        "200":
+          description: Liste de questions et leurs réponses.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "" # Le message est vide en cas de succès dans le code
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        question:
+                          $ref: "#/components/schemas/Question"
+                        reponses:
+                          type: array
+                          items:
+                            $ref: "#/components/schemas/Reponse"
+        "400":
+          description: Le nombre de questions doit être supérieur à zéro.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidNumber:
+                  value:
+                    status: 400
+                    message: "Le nombre de questions doit être supérieur à zéro"
+        "405":
+          description: Méthode non autorisée. Seule la méthode POST est acceptée (basé sur le code).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                methodNotAllowed:
+
+  /fin-test:
+    post:
+      summary: Sauvegarder le score d'un test
+      description: |
+        Permet à un utilisateur authentifié de sauvegarder son score après avoir terminé un test.
+        Le token obtenu lors de la connexion doit être fourni dans l'en-tête `Authorization` sous la forme `Bearer {token}`.
+        Le score et le nombre de questions sont passés dans le corps de la requête JSON.
+      tags:
+        - Résultats
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: "#/components/requestBodies/SaveScoreRequest"
+      parameters: []
+      responses:
+        "200":
+          description: Score sauvegardé avec succès.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneralSuccessResponse"
+              examples:
+                scoreSaved:
+                  value:
+                    status: 200
+                    message: "Score sauvegardé avec succès"
+                    data: null # Ajout de data: null pour correspondre à GeneralSuccessResponse
+        "400":
+          description: Données manquantes ou invalides. Score et nombre de questions sont requis. # MODIFICATION: Description mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                scoreRequired: # Nom de l'exemple mis à jour pour refléter la nouvelle condition
+                  value:
+                    status: 400
+                    message: "Score et nombre de questions requis"
+        "401":
+          description: Non autorisé. Le token d'authentification est manquant ou invalide.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                unauthorized:
+                  value:
+                    status: 401
+                    message: "Token requis"
+        "405":
+          description: Méthode non autorisée. Seule la méthode POST est acceptée.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                methodNotAllowed:
+                  value:
+                    status: 405
+                    message: "Méthode non autorisée"
+        "500":
+          description: Échec de la sauvegarde du score.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                saveFailed:
+                  value:
+                    status: 500
+                    message: "Échec de la sauvegarde du score"

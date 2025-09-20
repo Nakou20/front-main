@@ -1,0 +1,39 @@
+
+x-env-variables: &env-variables
+  environment:
+    - MYSQL_ROOT_PASSWORD=cds49
+    - MYSQL_DATABASE=cds49
+    - MYSQL_USER=cds49
+    - MYSQL_PASSWORD=cds49
+    - MVC_SERVER=bdd
+    - MVC_DB=cds49
+    - MVC_USER=cds49
+    - MVC_TOKEN=cds49
+    - MVC_DEBUG=false
+    - MVC_URL_BASE=http://localhost:9000/
+    - MVC_MAIL_SERVER=mail.dombtsig.local
+
+services:
+  front:
+    <<: *env-variables
+    build: .
+    container_name: front
+    command: php -S 0.0.0.0:9000 index.php
+    volumes:
+      - .:/var/www/html/
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+  bdd:
+    <<: *env-variables
+    image: mysql:8
+    container_name: bdd
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    driver: local
