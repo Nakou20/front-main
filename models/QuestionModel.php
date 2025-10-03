@@ -16,7 +16,7 @@ class QuestionModel extends SQL
     {
         parent::__construct('question', 'idquestion');
     }
-
+    
     /**
      * Retourne N questions aléatoires.
      */

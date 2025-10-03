@@ -18,4 +18,9 @@ class VehiculeModel extends SQL
     {
         parent::__construct('vehicule', 'idvehicule');
     }
+    public function getAllVehicules(): array
+    {
+       $rqt = "SELECT * FROM vehicule";
+       return $this->getAll($rqt);  
+    }
 }

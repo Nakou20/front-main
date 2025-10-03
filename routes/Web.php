@@ -8,6 +8,7 @@ use routes\base\Route;
 use utils\SessionHelpers;
 use controllers\PublicWebController;
 use controllers\UtilisateurController;
+use models\MoniteurModel;
 
 class Web
 {
@@ -21,7 +22,6 @@ class Web
         Route::Add('/', [$public, 'home']);
         Route::Add('/forfaits.html', [$public, 'forfait']);
         Route::Add('/a_propos.html', [$public, 'aPropos']);
-        Route::Add('/equipe.html', [$public, 'equipe']);
 
         // Gestion utilisateur
         Route::Add('/creer-compte.html', [$utilisateur, 'creerCompte']);
@@ -49,5 +49,15 @@ class Web
         /* Route::Add('/about', function () {
             return Template::render('views/global/about.php');
         }); */
+        Route:: Add('/equipe.html', function () {
+            $moniteurs = (new \models\MoniteurModel())->getAll();
+            $vehicules = (new \models\VehiculeModel())->getAll();
+
+            return Template::render('views/global/equipe.php', [
+                'teamMembers' => $moniteurs,
+                'vehicles' => $vehicules
+            ]);
+
+        });
     }
 }

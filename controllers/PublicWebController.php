@@ -23,10 +23,6 @@ class PublicWebController extends WebController
     {
         return Template::render("views/global/a_propos.php");
     }
-    function equipe(): string
-    {
-        return Template::render("views/global/equipe.php");
-    }
 
     function forfait(): string
     {
@@ -37,4 +33,5 @@ class PublicWebController extends WebController
             'forfaits' => $forfaits
         ]);
     }
+
 }

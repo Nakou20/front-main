@@ -17,4 +17,9 @@ class MoniteurModel extends SQL
     {
         parent::__construct('moniteur', 'idmoniteur');
     }
+    public function getAllMoniteurs(): array
+    {
+       $rqt = "SELECT * FROM moniteur";
+       return $this->getAll($rqt);  
+    }
 }
