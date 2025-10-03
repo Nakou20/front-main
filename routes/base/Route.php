@@ -125,6 +125,18 @@ class Route
         // Est-ce que la page demandée est autorisée.
         if ($matches) {
 
+            // Si la requête est de type OPTIONS, on répond juste OK (CORS preflight)
+            if ($isBrowser && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+                // Ajout en-têtes CORS
+                header("Access-Control-Allow-Origin: *");
+                header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+                header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization");
+
+                // Réponse vide avec code 200
+                http_response_code(200);
+                exit();
+            }
+
             $match = $matches[0];
             // Extraction des paramètres présents dans la route, pour les mettre
             // dans la liste des arguments passé à la méthode.

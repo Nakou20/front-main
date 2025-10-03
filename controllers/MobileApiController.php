@@ -153,7 +153,7 @@ class MobileApiController extends ApiController
         if ($categorie == null || $categorie == 'random') {
             $questions = $this->questionModel->getRandomQuestions($n);
         } else {
-            // TODO: Implémenter la logique pour récupérer les questions par catégorie
+            $questions = $this->questionModel->getQuestionsByCategory($categorie, $n);
         }
 
 

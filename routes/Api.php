@@ -17,6 +17,7 @@ class Api
         Route::Add('/api/profile/get', [$mobileApiController, 'getProfile']);
         Route::Add('/api/profile/update', [$mobileApiController, 'updateProfile']);
         Route::Add('/api/questions/{n}', [$mobileApiController, 'getQuestions']);
+        Route::ADd('/api/questions/{cat}', [$mobileApiController, 'getQuestionsByCategory']);
         Route::Add('/api/fin-test', [$mobileApiController, 'saveScore']);
     }
 }
