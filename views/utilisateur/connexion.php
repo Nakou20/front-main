@@ -18,7 +18,7 @@
                         <?= htmlspecialchars($success) ?>
                     </div>
                 <?php } ?>
-
+                
                 <form method="POST" action="connexion.html">
                     <div class="mb-3">
                         <label for="email" class="form-label">Adresse Email</label>

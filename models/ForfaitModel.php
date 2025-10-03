@@ -45,4 +45,5 @@ class ForfaitModel extends SQL
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_OBJ);
     }
+
 }

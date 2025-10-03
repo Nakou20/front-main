@@ -113,26 +113,22 @@ class EleveModel extends SQL
      */
     public function connexion(string $email, string $motDePasse, string $token = ""): array
     {
-        $query = "SELECT * FROM eleve WHERE emaileleve = :email AND motpasseeleve = :motDePasse LIMIT 1";
+        $query = "SELECT * FROM eleve WHERE emaileleve = :email  LIMIT 1";
         $params = [
             ':email' => $email,
-            ':motDePasse' => $motDePasse
         ];
 
         $result = $this->getPdo()->prepare($query);
         $result->execute($params);
         $eleve = $result->fetch();
 
-        // TODO: Le code est vulnérable, le mot de passe est stocké en clair dans la base de données.
-        // Il est recommandé de stocker les mots de passe de manière sécurisée (par exemple, en utilisant un hachage).
-        // Ici, il faudrait donc utiliser password_verify() pour vérifier le mot de passe haché.
-        // Exemple :
-        // password_verify($motDePasse, $eleve['motpasseeleve'])
+        
 
-        if ($eleve) {
+        if ($eleve && password_verify($motDePasse, $eleve['motpasseeleve'])) {
             // Si l'élève existe, sauvegarder les informations dans la session
             SessionHelpers::login($eleve);
-        } else {
+        } else 
+        {
             // Si l'élève n'existe pas, détruire la session
             SessionHelpers::logout();
         }
@@ -295,4 +291,5 @@ class EleveModel extends SQL
             return false;
         }
     }
+    
 }

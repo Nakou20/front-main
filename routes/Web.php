@@ -21,6 +21,7 @@ class Web
         Route::Add('/', [$public, 'home']);
         Route::Add('/forfaits.html', [$public, 'forfait']);
         Route::Add('/a_propos.html', [$public, 'aPropos']);
+        Route::Add('/equipe.html', [$public, 'equipe']);
 
         // Gestion utilisateur
         Route::Add('/creer-compte.html', [$utilisateur, 'creerCompte']);

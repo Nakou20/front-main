@@ -1,5 +1,4 @@
 <?php
-
 use utils\SessionHelpers;
 ?>
 
@@ -43,6 +42,9 @@ use utils\SessionHelpers;
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/#adresse">Nous trouver</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/equipe.html">Notre Équipe</a>
                         </li>
                         <li class="nav-item d-lg-none">
                             <a class="nav-link" href="/creer-compte.html">Créer un compte</a>

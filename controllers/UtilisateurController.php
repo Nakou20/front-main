@@ -52,8 +52,9 @@ class UtilisateurController extends WebController
                 SessionHelpers::setFlashMessage('error', 'Les mots de passe ne correspondent pas.');
             } else {
                 // Création de l'élève dans la base de données (en utilisant le modèle EleveModel).
-                $password = password_hash($password, PASSWORD_BCRYPT);
-                $success = $this->eleveModel->creer_eleve($nom, $prenom, $email, $password, $dateNaissance, $numero);
+
+                $hashed_password = password_hash($password.$_ENV['PEPPER'], PASSWORD_DEFAULT);
+                $success = $this->eleveModel->creer_eleve($nom, $prenom, $email, $hashed_password, $dateNaissance, $numero);
 
                 if ($success) {
                     $this->redirect('/mon-compte/');
@@ -98,7 +99,7 @@ class UtilisateurController extends WebController
             }
 
             // Vérification des identifiants de l'utilisateur (en utilisant le modèle EleveModel).
-            $eleve = $this->eleveModel->connexion($email, $password);
+            $eleve = $this->eleveModel->connexion($email, $password.$_ENV['PEPPER']);
 
             if ($eleve) {
                 $this->redirect('/mon-compte/');
