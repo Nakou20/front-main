@@ -72,7 +72,7 @@ class MobileApiController extends ApiController
         }
 
         // Récupération depuis l'en-tête (Bearer token), on ne garde que le token
-        $token = trim(str_replace('Bearer ', '', $_SERVER['HTTP_AUTHORIZATION'] ?? ''));
+        $token = $this->getAuthToken();
 
         if (empty($token)) {
             return $this->errorResponse('Token requis', 401);
