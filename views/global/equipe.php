@@ -10,12 +10,12 @@
     $vehicules = $vehiculeModel->getAllVehicules();
     ?>
     <div class="row">
-        <div class="col-md-6">
-            <h3>Moniteurs</h3>
+        <div class="col-md-12">
+            <h3>Moniteurs :</h3>
             <?php if (!empty($moniteurs)): ?>
-                <ul class="list-group">
+                <ul class="list-group mb-5">
                     <?php foreach ($moniteurs as $m): ?>
-                        <li class="list-group-item">
+                        <li class="list-group-item mb-3">
                             <strong><?= htmlspecialchars($m->prenommoniteur . ' ' . $m->nommoniteur) ?></strong><br>
                             📧 <?= htmlspecialchars($m->emailmoniteur) ?>
                         </li>
@@ -25,16 +25,18 @@
                 <p class="text-muted">Aucun moniteur disponible.</p>
             <?php endif; ?>
         </div>
-        <div class="col-md-6">
-            <h3>Véhicules</h3>
+        <div class="col-md-12">
+            <h3>Véhicules :</h3>
             <?php if (!empty($vehicules)): ?>
                 <ul class="list-group">
                     <?php foreach ($vehicules as $v): ?>
-                        <li class="list-group-item">
-                            <strong><?= htmlspecialchars($v->designation) ?></strong><br>
-                            Immatriculation: <?= htmlspecialchars($v->immatriculation) ?><br>
-                            Passagers: <?= htmlspecialchars($v->nbpassagers) ?><br>
-                            Manuel: <?= $v->manuel ? 'Oui' : 'Non' ?><br>
+                        <li class="list-group-item d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <strong><?= htmlspecialchars($v->designation) ?></strong><br>
+                                Immatriculation: <?= htmlspecialchars($v->immatriculation) ?><br>
+                                Passagers: <?= htmlspecialchars($v->nbpassagers) ?><br>
+                                Manuel: <?= $v->manuel ? 'Oui' : 'Non' ?>
+                            </div>
                             <img src="<?=$v->lien_image?>" alt="<?= htmlspecialchars($v->designation) ?>" style="max-width: 220px; max-height: 220px;">
                         </li>
                     <?php endforeach; ?>
