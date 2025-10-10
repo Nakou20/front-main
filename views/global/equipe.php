@@ -1,4 +1,3 @@
-<h1>Notre Équipe</h1>
 <div class="container">
     <h1 class="mb-4 text-center">Liste des Moniteurs et des Véhicules</h1>
     <?php

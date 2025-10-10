@@ -39,10 +39,12 @@
 
                                     ?>
                                 </h3>
-                                <a href="activer-offre.html?idforfait=<?= $forfait->idforfait; ?>"
-                                    class="btn <?= $forfait->prixhoraire ? 'btn-outline-primary' : 'btn-primary'; ?> mt-auto">
-                                    Choisir ce forfait
-                                </a>
+                                <form method="post" action="activer-offre.html" class="mt-auto">
+                                    <input type="hidden" name="idforfait" value="<?= $forfait->idforfait; ?>">
+                                    <button type="submit" class="btn <?= $forfait->prixhoraire ? 'btn-outline-primary' : 'btn-primary'; ?>">
+                                        Choisir ce forfait
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

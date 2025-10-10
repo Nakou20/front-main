@@ -29,7 +29,9 @@ class Web
         Route::Add('/mot-de-passe-oublie.html', [$utilisateur, 'motDePasseOublie']);
 
         // Gestion de l'offre
-        Route::Add('/activer-offre.html', [$utilisateur, 'activerOffre']);
+        Route::Add('/activer-offre.html', function () {
+            return Template::render('views/global/activer-offre.php');
+        });
 
         // Documentation API
         Route::Add('/documentation-api.html', function () {
