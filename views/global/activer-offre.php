@@ -1,5 +1,7 @@
 <?php
+session_start();
 use models\ForfaitModel;
+use utils\SessionHelpers;
 
 $model = new ForfaitModel();
 
@@ -8,6 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['idforfait'])) {
     $forfait = $model->getById($idforfait);
 
     if ($forfait) {
+        // Mémoriser temporairement le forfait sélectionné dans la session
+        $_SESSION['selected_forfait'] = $forfait;
         ?>
         <main class="container mt-5 pt-5">
             <header class="text-center mb-5">
@@ -42,10 +46,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['idforfait'])) {
                         ?>
                     </h3>
 
-                    <form method="post" action="confirmer-activation.php">
-                        <input type="hidden" name="idforfait" value="<?= $forfait->idforfait; ?>">
-                        <button type="submit" class="btn btn-success w-100">Activer ce forfait</button>
-                    </form>
+                    <?php if (!SessionHelpers::isLogin()) { ?>
+                        <div class="alert alert-info text-center">
+                            <p>Pour activer ce forfait, vous devez vous connecter ou créer un compte. Votre choix sera mémorisé et le forfait sera activé après votre authentification.</p>
+                            <a href="connexion.html" class="btn btn-primary me-2">Se connecter</a>
+                            <a href="creer-compte.html" class="btn btn-secondary">Créer un compte</a>
+                        </div>
+                    <?php } else { ?>
+                        <form method="post" action="confirmer-activation.php">
+                            <input type="hidden" name="idforfait" value="<?= $forfait->idforfait; ?>">
+                            <button type="submit" class="btn btn-success w-100">Activer ce forfait</button>
+                        </form>
+                    <?php } ?>
 
                     <a href="forfaits.php" class="btn btn-secondary w-100 mt-2">Retour aux forfaits</a>
                 </div>
@@ -60,4 +72,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['idforfait'])) {
     exit;
 }
 ?>
-
