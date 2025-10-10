@@ -23,3 +23,4 @@ class MoniteurModel extends SQL
        return $this->getAll($rqt);  
     }
 }
+
