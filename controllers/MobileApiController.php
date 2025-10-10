@@ -150,7 +150,7 @@ class MobileApiController extends ApiController
 
 
         // Si la catégorie est null ou 'random', on récupère des questions aléatoires
-        if ($categorie == null || $categorie == 'random') {
+        if ($categorie == null || $categorie == 0) {
             $questions = $this->questionModel->getRandomQuestions($n);
         } else {
             $questions = $this->questionModel->getQuestionsByCategory($categorie, $n);
