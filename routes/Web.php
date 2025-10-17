@@ -44,6 +44,7 @@ class Web
             Route::Add('/mon-compte/planning.html', [$compte, 'planning']);
             Route::Add('/mon-compte/profil.html', [$compte, 'mesInformations']);
             Route::Add('/mon-compte/', [$compte, 'monCompte']);
+            Route::Add('/confirmer-activation.html', [$compte, 'confirmerActivation']);
         }
 
         // Appel la fonction inline dans le routeur.

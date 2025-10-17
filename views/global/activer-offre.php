@@ -1,5 +1,4 @@
 <?php
-session_start();
 use models\ForfaitModel;
 use utils\SessionHelpers;
 
@@ -10,7 +9,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['idforfait'])) {
     $forfait = $model->getById($idforfait);
 
     if ($forfait) {
-        // Mémoriser temporairement le forfait sélectionné dans la session
         $_SESSION['selected_forfait'] = $forfait;
         ?>
         <main class="container mt-5 pt-5">
@@ -53,13 +51,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['idforfait'])) {
                             <a href="creer-compte.html" class="btn btn-secondary">Créer un compte</a>
                         </div>
                     <?php } else { ?>
-                        <form method="post" action="confirmer-activation.php">
+                        <form method="post" action="/confirmer-activation.html">
                             <input type="hidden" name="idforfait" value="<?= $forfait->idforfait; ?>">
                             <button type="submit" class="btn btn-success w-100">Activer ce forfait</button>
                         </form>
                     <?php } ?>
 
-                    <a href="forfaits.php" class="btn btn-secondary w-100 mt-2">Retour aux forfaits</a>
+                    <a href="forfaits.html" class="btn btn-secondary w-100 mt-2">Retour aux forfaits</a>
                 </div>
             </div>
         </main>

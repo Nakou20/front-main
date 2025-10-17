@@ -8,18 +8,21 @@ use models\InscrireModel;
 use utils\SessionHelpers;
 use controllers\base\WebController;
 use models\ConduireModel;
+use models\ForfaitModel;
 
 class CompteController extends WebController
 {
     private EleveModel $eleveModel;
     private InscrireModel $inscrireModel;
     private ConduireModel $conduireModel;
+    private ForfaitModel $forfaitModel;
 
     public function __construct()
     {
         $this->eleveModel = new EleveModel();
         $this->inscrireModel = new InscrireModel();
         $this->conduireModel = new ConduireModel();
+        $this->forfaitModel = new ForfaitModel();
     }
 
     /**
@@ -107,5 +110,30 @@ class CompteController extends WebController
     {
         SessionHelpers::logout();
         $this->redirect('/');
+    }
+
+    /**
+     * Confirme et active le forfait sélectionné pour l'utilisateur connecté.
+     *
+     * @return void
+     */
+    public function confirmerActivation(): void
+    {
+        if ($this->isPost() && isset($_POST['idforfait'])) {
+            $idforfait = (int) $_POST['idforfait'];
+            $ideleve = SessionHelpers::getConnected()['ideleve'];
+
+            $success = $this->forfaitModel->activateForfait($ideleve, $idforfait);
+
+            if ($success) {
+                SessionHelpers::setFlashMessage('success', 'Forfait activé avec succès.');
+                $this->redirect('/mon-compte/planning.html');
+            } else {
+                SessionHelpers::setFlashMessage('error', 'Erreur lors de l\'activation du forfait.');
+                $this->redirect('/activer-offre.html');
+            }
+        } else {
+            $this->redirect('/forfaits.html');
+        }
     }
 }
