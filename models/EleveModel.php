@@ -196,8 +196,6 @@ class EleveModel extends SQL
         }
 
         // Exécuter la requête
-        print_r($motDePasse);
-        print_r($query);
         $stmt = $pdo->prepare($query);
 
         $result = $stmt->execute($params);
