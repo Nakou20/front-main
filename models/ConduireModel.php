@@ -43,6 +43,7 @@ class ConduireModel extends SQL
         // On Compte le nombre de leçons plannifiées
         foreach ($lessons as $lesson) {
             $planning[] = [
+                'id' => $lesson->ideleve . '-' . $lesson->idvehicule . '-' . $lesson->idmoniteur . '-' . strtotime($lesson->heuredebut),
                 'start' => $lesson->heuredebut,
                 'end' => date('Y-m-d H:i', strtotime($lesson->heuredebut) + 3600), // Durée de 1 heure
                 'title' => "Leçon de conduite"
@@ -74,5 +75,72 @@ class ConduireModel extends SQL
             'nbLeconsRestantes' => $nbLeconsRestantes,
             'prochainRdv' => $prochainRdv
         ];
+    }
+
+    /**
+     * Retourne les détails d'une leçon spécifique avec les informations du moniteur et du véhicule
+     */
+    public function getLeconDetails(int $idEleve, int $idMoniteur, int $idVehicule, string $heureDebut): ?object
+    {
+        $stmt = $this->getPdo()->prepare("
+            SELECT 
+                c.*,
+                m.nommoniteur as moniteur_nom,
+                m.prenommoniteur as moniteur_prenom,
+                m.emailmoniteur as moniteur_email,
+                v.designation as vehicule_designation,
+                v.immatriculation as vehicule_immatriculation
+            FROM conduire c
+            LEFT JOIN moniteur m ON c.idmoniteur = m.idmoniteur
+            LEFT JOIN vehicule v ON c.idvehicule = v.idvehicule
+            WHERE c.ideleve = :ideleve 
+            AND c.idmoniteur = :idmoniteur 
+            AND c.idvehicule = :idvehicule 
+            AND c.heuredebut = :heuredebut
+        ");
+
+        $stmt->execute([
+            ':ideleve' => $idEleve,
+            ':idmoniteur' => $idMoniteur,
+            ':idvehicule' => $idVehicule,
+            ':heuredebut' => $heureDebut
+        ]);
+
+        $lecon = $stmt->fetch(\PDO::FETCH_OBJ);
+        return $lecon ?: null;
+    }
+
+    /**
+     * Vérifie si une leçon peut être annulée (au moins 48h avant)
+     */
+    public function canCancelLesson(string $heureDebut): bool
+    {
+        $lessonTime = strtotime($heureDebut);
+        $now = time();
+        $diff = $lessonTime - $now;
+
+        // 48 heures = 172800 secondes
+        return $diff >= 172800;
+    }
+
+    /**
+     * Annule une leçon
+     */
+    public function cancelLesson(int $idEleve, int $idMoniteur, int $idVehicule, string $heureDebut): bool
+    {
+        $stmt = $this->getPdo()->prepare("
+            DELETE FROM conduire 
+            WHERE ideleve = :ideleve 
+            AND idmoniteur = :idmoniteur 
+            AND idvehicule = :idvehicule 
+            AND heuredebut = :heuredebut
+        ");
+
+        return $stmt->execute([
+            ':ideleve' => $idEleve,
+            ':idmoniteur' => $idMoniteur,
+            ':idvehicule' => $idVehicule,
+            ':heuredebut' => $heureDebut
+        ]);
     }
 }

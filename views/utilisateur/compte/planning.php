@@ -1,3 +1,12 @@
+<?php
+/**
+ * @var object|null $forfait
+ * @var array $planning
+ * @var array $eleve
+ * @var string|null $error
+ * @var string|null $success
+ */
+?>
 <main class="container pt-4">
     <section id="espace-connecte">
         <h1 class="mb-4">Mon Espace</h1>
@@ -76,27 +85,44 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
+
+        // Vérifier que l'élément calendrier existe
+        if (!calendarEl) {
+            console.error('Élément calendar non trouvé');
+            return;
+        }
+
         var calendar = new FullCalendar.Calendar(calendarEl, {
-            height: 850, // Hauteur du calendrier,
-            expandRows: true, // Permet d'étendre les lignes pour afficher tous les événements
-            initialView: 'timeGridWeek', // Vue agenda hebdomadaire
-            slotMinTime: '08:00:00', // Heure de début
-            slotMaxTime: '20:00:00', // Heure de fin
-            slotDuration: '01:00:00', // Durée des créneaux
-            allDaySlot: false, // Masquer le créneau "toute la journée"
+            height: 850,
+            expandRows: true,
+            initialView: 'timeGridWeek',
+            slotMinTime: '08:00:00',
+            slotMaxTime: '20:00:00',
+            slotDuration: '01:00:00',
+            allDaySlot: false,
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
                 right: 'timeGridWeek'
             },
-            events: [
-                <?php foreach ($planning['planning'] as $lecon) { ?> {
-                        title: '<?= htmlspecialchars($lecon['title']) ?>',
-                        start: '<?= date('Y-m-d\TH:i:s', strtotime($lecon['start'])) ?>',
-                        end: '<?= date('Y-m-d\TH:i:s', strtotime($lecon['end'])) ?>'
-                    },
-                <?php } ?>
-            ],
+            events: function(info, successCallback, failureCallback) {
+                // Charger les événements via AJAX
+                fetch('/mon-compte/planning.json')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erreur lors du chargement des événements');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Événements chargés:', data);
+                        successCallback(data);
+                    })
+                    .catch(error => {
+                        console.error('Erreur:', error);
+                        failureCallback(error);
+                    });
+            },
             locale: 'fr',
             buttonText: {
                 today: 'Aujourd\'hui',
@@ -104,8 +130,27 @@
                 week: 'Semaine',
                 day: 'Jour',
                 list: 'Liste'
+            },
+            eventClick: function(info) {
+                // Empêcher le comportement par défaut
+                info.jsEvent.preventDefault();
+
+                console.log('Événement cliqué:', info.event.id);
+
+                // Rediriger vers la page de détails de la leçon
+                if (info.event.id) {
+                    window.location.href = '/mon-compte/planning/details_lecon.html?lecon_id=' + info.event.id;
+                } else {
+                    console.error('ID de l\'événement manquant');
+                }
+            },
+            eventMouseEnter: function(info) {
+                // Changer le curseur pour indiquer que c'est cliquable
+                info.el.style.cursor = 'pointer';
             }
         });
+
         calendar.render();
+        console.log('Calendrier initialisé');
     });
 </script>

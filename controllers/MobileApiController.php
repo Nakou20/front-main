@@ -72,7 +72,7 @@ class MobileApiController extends ApiController
         }
 
         // Récupération depuis l'en-tête (Bearer token), on ne garde que le token
-        $token = $this->getAuthToken();
+        $token = trim(str_replace('Bearer ', '', $_SERVER['HTTP_AUTHORIZATION'] ?? ''));
 
         if (empty($token)) {
             return $this->errorResponse('Token requis', 401);
@@ -150,15 +150,10 @@ class MobileApiController extends ApiController
 
 
         // Si la catégorie est null ou 'random', on récupère des questions aléatoires
-        if ($categorie == null || $categorie == '0') {
+        if ($categorie == null || $categorie == 'random') {
             $questions = $this->questionModel->getRandomQuestions($n);
         } else {
-            $idcategorie = (int)$categorie;
-            if ($idcategorie <= 0) {
-                return $this->errorResponse('Catégorie invalide', 400);
-            }
-
-            $questions = $this->questionModel->getQuestionsByCategory($idcategorie, $n);
+            // TODO: Implémenter la logique pour récupérer les questions par catégorie
         }
 
 

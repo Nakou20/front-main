@@ -196,6 +196,8 @@ class EleveModel extends SQL
         }
 
         // Exécuter la requête
+        print_r($motDePasse);
+        print_r($query);
         $stmt = $pdo->prepare($query);
 
         $result = $stmt->execute($params);
@@ -221,7 +223,7 @@ class EleveModel extends SQL
     public function getByToken(string $token)
     {
         // Récupérer l'ID de l'élève à partir du token
-        $query = "SELECT * FROM token WHERE token = :token LIMIT 1";
+        $query = "SELECT ideleve FROM token WHERE token = :token LIMIT 1";
         $stmt = $this->getPdo()->prepare($query);
         $stmt->execute([':token' => $token]);
         $result = $stmt->fetch();
@@ -290,4 +292,32 @@ class EleveModel extends SQL
         }
     }
     
+    /**
+     * Récupère un élève par son email
+     * @param string $email
+     * @return object|false
+     */
+    public function getByEmail(string $email)
+    {
+        $query = "SELECT * FROM eleve WHERE emaileleve = :email LIMIT 1";
+        $stmt = $this->getPdo()->prepare($query);
+        $stmt->execute([':email' => $email]);
+        return $stmt->fetch(\PDO::FETCH_OBJ);
+    }
+
+    /**
+     * Met à jour le mot de passe d'un élève par son email
+     * @param string $email
+     * @param string $newPassword Le mot de passe déjà hashé
+     * @return bool
+     */
+    public function updatePasswordByEmail(string $email, string $newPassword): bool
+    {
+        $query = "UPDATE eleve SET motpasseeleve = :password WHERE emaileleve = :email";
+        $stmt = $this->getPdo()->prepare($query);
+        return $stmt->execute([
+            ':password' => $newPassword,
+            ':email' => $email
+        ]);
+    }
 }

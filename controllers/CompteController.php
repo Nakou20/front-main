@@ -8,21 +8,18 @@ use models\InscrireModel;
 use utils\SessionHelpers;
 use controllers\base\WebController;
 use models\ConduireModel;
-use models\ForfaitModel;
 
 class CompteController extends WebController
 {
     private EleveModel $eleveModel;
     private InscrireModel $inscrireModel;
     private ConduireModel $conduireModel;
-    private ForfaitModel $forfaitModel;
 
     public function __construct()
     {
         $this->eleveModel = new EleveModel();
         $this->inscrireModel = new InscrireModel();
         $this->conduireModel = new ConduireModel();
-        $this->forfaitModel = new ForfaitModel();
     }
 
     /**
@@ -113,27 +110,154 @@ class CompteController extends WebController
     }
 
     /**
-     * Confirme et active le forfait sélectionné pour l'utilisateur connecté.
+     * Retourne le planning de l'utilisateur au format JSON pour FullCalendar.
      *
-     * @return void
+     * @return string JSON
      */
-    public function confirmerActivation(): void
+    public function getPlanningJson(): string
     {
-        if ($this->isPost() && isset($_POST['idforfait'])) {
-            $idforfait = (int) $_POST['idforfait'];
-            $ideleve = SessionHelpers::getConnected()['ideleve'];
+        header('Content-Type: application/json');
 
-            $success = $this->forfaitModel->activateForfait($ideleve, $idforfait);
+        // Récupération du planning de l'utilisateur connecté
+        $planning = $this->conduireModel->getLessonsByEleve();
 
-            if ($success) {
-                SessionHelpers::setFlashMessage('success', 'Forfait activé avec succès.');
-                $this->redirect('/mon-compte/planning.html');
-            } else {
-                SessionHelpers::setFlashMessage('error', 'Erreur lors de l\'activation du forfait.');
-                $this->redirect('/activer-offre.html');
-            }
-        } else {
-            $this->redirect('/forfaits.html');
+        // Formater les événements pour FullCalendar
+        $events = [];
+        foreach ($planning['planning'] as $lecon) {
+            $events[] = [
+                'id' => $lecon['id'],
+                'title' => $lecon['title'],
+                'start' => date('Y-m-d\TH:i:s', strtotime($lecon['start'])),
+                'end' => date('Y-m-d\TH:i:s', strtotime($lecon['end']))
+            ];
         }
+
+        return json_encode($events);
+    }
+
+    /**
+     * Affiche les détails d'une leçon
+     */
+    public function detailsLecon(): string
+    {
+        // Récupération des paramètres
+        $leconId = $_GET['lecon_id'] ?? null;
+
+        if (!$leconId) {
+            SessionHelpers::setFlashMessage('error', 'Leçon introuvable.');
+            $this->redirect('/mon-compte/planning.html');
+        }
+
+        // Décoder l'ID de la leçon (format: ideleve-idvehicule-idmoniteur-timestamp)
+        $parts = explode('-', $leconId);
+        if (count($parts) !== 4) {
+            SessionHelpers::setFlashMessage('error', 'Identifiant de leçon invalide.');
+            $this->redirect('/mon-compte/planning.html');
+        }
+
+        list($idEleve, $idVehicule, $idMoniteur, $timestamp) = $parts;
+        $heureDebut = date('Y-m-d H:i:s', (int)$timestamp);
+
+        // Vérifier que la leçon appartient bien à l'utilisateur connecté
+        $eleveConnecte = SessionHelpers::getConnected();
+        if ($eleveConnecte['ideleve'] != $idEleve) {
+            SessionHelpers::setFlashMessage('error', 'Vous n\'avez pas accès à cette leçon.');
+            $this->redirect('/mon-compte/planning.html');
+        }
+
+        // Récupération des détails de la leçon
+        $lecon = $this->conduireModel->getLeconDetails(
+            (int)$idEleve,
+            (int)$idMoniteur,
+            (int)$idVehicule,
+            $heureDebut
+        );
+
+        if (!$lecon) {
+            SessionHelpers::setFlashMessage('error', 'Leçon introuvable.');
+            $this->redirect('/mon-compte/planning.html');
+        }
+
+        // Vérifier si la leçon peut être annulée
+        $canCancel = $this->conduireModel->canCancelLesson($lecon->heuredebut);
+
+        return Template::render(
+            "views/utilisateur/compte/details_lecon.php",
+            [
+                'titre' => 'Détails de la leçon',
+                'lecon' => $lecon,
+                'canCancel' => $canCancel,
+                'eleve' => $eleveConnecte,
+                'error' => SessionHelpers::getFlashMessage('error'),
+                'success' => SessionHelpers::getFlashMessage('success')
+            ]
+        );
+    }
+
+    /**
+     * Annule une leçon
+     */
+    public function annulerLecon(): string
+    {
+        if (!$this->isPost()) {
+            $this->redirect('/mon-compte/planning.html');
+        }
+
+        $leconId = $_POST['lecon_id'] ?? null;
+
+        if (!$leconId) {
+            SessionHelpers::setFlashMessage('error', 'Leçon introuvable.');
+            $this->redirect('/mon-compte/planning.html');
+        }
+
+        // Décoder l'ID de la leçon
+        $parts = explode('-', $leconId);
+        if (count($parts) !== 4) {
+            SessionHelpers::setFlashMessage('error', 'Identifiant de leçon invalide.');
+            $this->redirect('/mon-compte/planning.html');
+        }
+
+        list($idEleve, $idVehicule, $idMoniteur, $timestamp) = $parts;
+        $heureDebut = date('Y-m-d H:i:s', (int)$timestamp);
+
+        // Vérifier que la leçon appartient bien à l'utilisateur connecté
+        $eleveConnecte = SessionHelpers::getConnected();
+        if ($eleveConnecte['ideleve'] != $idEleve) {
+            SessionHelpers::setFlashMessage('error', 'Vous n\'avez pas accès à cette leçon.');
+            $this->redirect('/mon-compte/planning.html');
+        }
+
+        // Vérifier si la leçon peut être annulée
+        if (!$this->conduireModel->canCancelLesson($heureDebut)) {
+            SessionHelpers::setFlashMessage('error', 'Cette leçon ne peut plus être annulée (moins de 48h avant le début).');
+            $this->redirect('/mon-compte/planning.html');
+        }
+
+        // Annuler la leçon
+        $success = $this->conduireModel->cancelLesson(
+            (int)$idEleve,
+            (int)$idMoniteur,
+            (int)$idVehicule,
+            $heureDebut
+        );
+
+        if ($success) {
+            // Envoyer un email de confirmation
+            $lecon = $this->conduireModel->getLeconDetails(
+                (int)$idEleve,
+                (int)$idMoniteur,
+                (int)$idVehicule,
+                $heureDebut
+            );
+
+            // TODO: Envoyer l'email de confirmation d'annulation
+            // EmailUtils::sendEmail(...);
+
+            SessionHelpers::setFlashMessage('success', 'Votre leçon a été annulée avec succès. Un email de confirmation vous a été envoyé.');
+        } else {
+            SessionHelpers::setFlashMessage('error', 'Une erreur est survenue lors de l\'annulation de la leçon.');
+        }
+
+        $this->redirect('/mon-compte/planning.html');
     }
 }

@@ -36,7 +36,23 @@
                                 Passagers: <?= htmlspecialchars($v->nbpassagers) ?><br>
                                 Manuel: <?= $v->manuel ? 'Oui' : 'Non' ?>
                             </div>
-                            <img src="<?=$v->lien_image?>" alt="<?= htmlspecialchars($v->designation) ?>" style="max-width: 220px; max-height: 220px;">
+                            <?php
+                            // Vérifier si lien_image existe et n'est pas vide
+                            if (isset($v->lien_image) && !empty($v->lien_image)) {
+                                // Normaliser le chemin : remplacer les backslashes par des slashes
+                                $imagePath = str_replace('\\', '/', $v->lien_image);
+
+                                // Ajouter le slash au début si nécessaire
+                                if (strpos($imagePath, '/') !== 0) {
+                                    $imagePath = '/' . $imagePath;
+                                }
+
+                                $imageUrl = htmlspecialchars($imagePath);
+                            } else {
+                                $imageUrl = '/public/images/icon.png';
+                            }
+                            ?>
+                            <img src="<?= $imageUrl ?>" alt="<?= htmlspecialchars($v->designation) ?>" style="max-width: 220px; max-height: 220px; object-fit: cover; border-radius: 8px;" onerror="this.src='/public/images/icon.png'; console.error('Image non trouvée: <?= $imageUrl ?>');">
                         </li>
                     <?php endforeach; ?>
                 </ul>

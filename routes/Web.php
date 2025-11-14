@@ -8,7 +8,6 @@ use routes\base\Route;
 use utils\SessionHelpers;
 use controllers\PublicWebController;
 use controllers\UtilisateurController;
-use models\MoniteurModel;
 
 class Web
 {
@@ -22,16 +21,16 @@ class Web
         Route::Add('/', [$public, 'home']);
         Route::Add('/forfaits.html', [$public, 'forfait']);
         Route::Add('/a_propos.html', [$public, 'aPropos']);
+        Route::Add('/equipe.html', [$public, 'equipe']);
 
         // Gestion utilisateur
         Route::Add('/creer-compte.html', [$utilisateur, 'creerCompte']);
         Route::Add('/connexion.html', [$utilisateur, 'connexion']);
         Route::Add('/mot-de-passe-oublie.html', [$utilisateur, 'motDePasseOublie']);
+        Route::Add('/reinitialiser-mot-de-passe.html', [$utilisateur, 'reinitialiserMotDePasse']);
 
         // Gestion de l'offre
-        Route::Add('/activer-offre.html', function () {
-            return Template::render('views/global/activer-offre.php');
-        });
+        Route::Add('/activer-offre.html', [$utilisateur, 'activerOffre']);
 
         // Documentation API
         Route::Add('/documentation-api.html', function () {
@@ -42,9 +41,11 @@ class Web
         if (SessionHelpers::isLogin()) {
             Route::Add('/deconnexion.html', [$compte, 'deconnexion']);
             Route::Add('/mon-compte/planning.html', [$compte, 'planning']);
+            Route::Add('/mon-compte/planning.json', [$compte, 'getPlanningJson']);
+            Route::Add('/mon-compte/planning/details_lecon.html', [$compte, 'detailsLecon']);
+            Route::Add('/mon-compte/planning/annuler_lecon.html', [$compte, 'annulerLecon']);
             Route::Add('/mon-compte/profil.html', [$compte, 'mesInformations']);
             Route::Add('/mon-compte/', [$compte, 'monCompte']);
-            Route::Add('/confirmer-activation.html', [$compte, 'confirmerActivation']);
         }
 
         // Appel la fonction inline dans le routeur.
@@ -52,15 +53,5 @@ class Web
         /* Route::Add('/about', function () {
             return Template::render('views/global/about.php');
         }); */
-        Route:: Add('/equipe.html', function () {
-            $moniteurs = (new \models\MoniteurModel())->getAll();
-            $vehicules = (new \models\VehiculeModel())->getAll();
-
-            return Template::render('views/global/equipe.php', [
-                'teamMembers' => $moniteurs,
-                'vehicles' => $vehicules
-            ]);
-
-        });
     }
 }

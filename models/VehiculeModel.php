@@ -18,9 +18,15 @@ class VehiculeModel extends SQL
     {
         parent::__construct('vehicule', 'idvehicule');
     }
+
+    /**
+     * Récupère tous les véhicules
+     * @return array
+     */
     public function getAllVehicules(): array
     {
-       $rqt = "SELECT * FROM vehicule";
-       return $this->getAll($rqt);  
+        $stmt = $this->getPdo()->prepare("SELECT * FROM vehicule ORDER BY designation");
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_OBJ);
     }
 }

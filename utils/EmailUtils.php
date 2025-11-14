@@ -20,13 +20,22 @@ class EmailUtils
         $mail->Host = $config["MAIL_SERVER"] ?: 'localhost';
         $mail->SMTPAuth = false;
         $mail->Port = 1025;
+        $mail->SMTPDebug = 0; // Activer le debug si nécessaire (2 pour debug complet)
 
-        $mail->setFrom($config["FROM_EMAIL"], "Contact");
+        $mail->setFrom($config["FROM_EMAIL"], "Contact CDS49");
         $mail->addAddress($to);
         $mail->Subject = $subject;
         $mail->Body = $message;
         $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
 
-        return $mail->send();
+        $result = $mail->send();
+
+        // Log l'erreur si l'envoi échoue
+        if (!$result && $config["DEBUG"]) {
+            error_log("Erreur d'envoi d'email à $to: " . $mail->ErrorInfo);
+        }
+
+        return $result;
     }
 }

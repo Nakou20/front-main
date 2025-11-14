@@ -6,7 +6,7 @@
 
     <section id="nos-forfaits" class="py-5">
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
-
+            
             <?php if (isset($forfaits) && !empty($forfaits)) { ?>
                 <?php foreach ($forfaits as $forfait) { ?>
                     <div class="col">
@@ -39,12 +39,10 @@
 
                                     ?>
                                 </h3>
-                                <form method="post" action="activer-offre.html" class="mt-auto">
-                                    <input type="hidden" name="idforfait" value="<?= $forfait->idforfait; ?>">
-                                    <button type="submit" class="btn <?= $forfait->prixhoraire ? 'btn-outline-primary' : 'btn-primary'; ?>">
-                                        Choisir ce forfait
-                                    </button>
-                                </form>
+                                <a href="activer-offre.html?idforfait=<?= $forfait->idforfait; ?>"
+                                    class="btn <?= $forfait->prixhoraire ? 'btn-outline-primary' : 'btn-primary'; ?> mt-auto">
+                                    Choisir ce forfait
+                                </a>
                             </div>
                         </div>
                     </div>

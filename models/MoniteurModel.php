@@ -17,10 +17,15 @@ class MoniteurModel extends SQL
     {
         parent::__construct('moniteur', 'idmoniteur');
     }
+
+    /**
+     * Récupère tous les moniteurs
+     * @return array
+     */
     public function getAllMoniteurs(): array
     {
-       $rqt = "SELECT * FROM moniteur";
-       return $this->getAll($rqt);  
+        $stmt = $this->getPdo()->prepare("SELECT * FROM moniteur ORDER BY nommoniteur, prenommoniteur");
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_OBJ);
     }
 }
-
