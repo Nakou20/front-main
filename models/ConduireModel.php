@@ -40,17 +40,17 @@ class ConduireModel extends SQL
         $lessons = $stmt->fetchAll(\PDO::FETCH_OBJ);
         $planning = [];
 
-        // On Compte le nombre de leçons plannifiées
         foreach ($lessons as $lesson) {
             $planning[] = [
                 'id' => $lesson->ideleve . '-' . $lesson->idvehicule . '-' . $lesson->idmoniteur . '-' . strtotime($lesson->heuredebut),
                 'start' => $lesson->heuredebut,
-                'end' => date('Y-m-d H:i', strtotime($lesson->heuredebut) + 3600), // Durée de 1 heure
+                'end' => date('Y-m-d H:i', strtotime($lesson->heuredebut) + 3600),
                 'title' => "Leçon de conduite"
             ];
         }
 
-        // Le prochain rendez-vous est le plus proche dans le futur par rapport à la date actuelle
+
+
         $prochainRdv = null;
         $stmt = $this->getPdo()->prepare("SELECT heuredebut FROM conduire WHERE ideleve = :ideleve AND heuredebut > NOW() ORDER BY heuredebut ASC LIMIT 1");
         $stmt->execute([':ideleve' => $idEleve]);
@@ -59,17 +59,17 @@ class ConduireModel extends SQL
             $prochainRdv = $nextLesson->heuredebut;
         }
 
-        // On récupère le forfait de l'élève pour savoir combien de leçons il lui reste
+
         $inscrireModel = new InscrireModel();
         $forfaitEleve = $inscrireModel->getForfaitEleveConnecte();
 
         $nbLeconsRestantes = 0;
         if ($forfaitEleve) {
-            // On suppose que le forfait contient un nombre de leçons
+
             $nbLeconsRestantes = $forfaitEleve->nbheures - count($lessons);
         }
 
-        // Créer la structure de retour (planning, nbLeconsRestantes, prochainRdv)
+
         return [
             'planning' => $planning,
             'nbLeconsRestantes' => $nbLeconsRestantes,
@@ -119,7 +119,7 @@ class ConduireModel extends SQL
         $now = time();
         $diff = $lessonTime - $now;
 
-        // 48 heures = 172800 secondes
+
         return $diff >= 172800;
     }
 

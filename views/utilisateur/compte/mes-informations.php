@@ -4,7 +4,7 @@
 
         <div class="row">
             <?php
-            // Inclusion de la sidebar pour l'espace compte utilisateur (menu de navigation)
+
             $page_active = 'profil';
             include '_sidebar_compte.php';
             ?>

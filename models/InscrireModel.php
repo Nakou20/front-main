@@ -26,7 +26,7 @@ class InscrireModel extends SQL
         $idEleve = SessionHelpers::getConnected()['ideleve'] ?? null;
 
         if (!$idEleve) {
-            return null; // Si l'ID de l'élève n'est pas défini, retourner null
+            return null;
         }
 
         $stmt = $this->getPdo()->prepare("SELECT * FROM inscrire LEFT JOIN forfait ON inscrire.idforfait = forfait.idforfait WHERE inscrire.ideleve = :ideleve;");

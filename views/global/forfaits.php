@@ -18,8 +18,7 @@
                                 <?php if (!empty($forfait->contenuforfait)) { ?>
                                     <ul class="list-unstyled mt-3 mb-4">
                                         <?php
-                                        // Permet de transformer le contenu du forfait en liste (par exemple, "Leçon de conduite;Examen blanc;Assistance administrative")
-                                        $contenuDetails = explode(';', $forfait->contenuforfait); // Découpe la chaine en utilisant le point-virgule comme séparateur
+                                        $contenuDetails = explode(';', $forfait->contenuforfait);
                                         foreach ($contenuDetails as $detail) { ?>
                                             <li><i class="fas fa-check text-success me-2"></i><?= htmlspecialchars(trim($detail)); ?></li>
                                         <?php } ?>

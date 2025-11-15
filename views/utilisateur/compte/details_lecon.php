@@ -9,7 +9,7 @@
  * @var string|null $success
  */
 
-// Extraction des variables pour l'IDE
+
 extract(get_defined_vars(), EXTR_SKIP);
 ?>
 <main class="container pt-4">
@@ -30,7 +30,6 @@ extract(get_defined_vars(), EXTR_SKIP);
 
         <div class="row">
             <?php
-            // Inclusion de la sidebar pour l'espace compte utilisateur (menu de navigation)
             $page_active = 'planning';
             include '_sidebar_compte.php';
             ?>
@@ -169,25 +168,25 @@ extract(get_defined_vars(), EXTR_SKIP);
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Adresse par défaut de l'auto-école
+
         const DEFAULT_ADDRESS = '2 rue Adrian Recouvreur 49100 Angers';
 
-        // Initialiser la carte Leaflet
+
         var map = L.map('map').setView([47.4704, -0.5519], 13);
 
-        // Ajouter le fond de carte OpenStreetMap
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19
         }).addTo(map);
 
-        // Récupérer l'adresse de la leçon (ou utiliser l'adresse par défaut si vide)
+
         var addressFromDB = <?= json_encode($lecon->lieurdv) ?>;
         var address = (addressFromDB && addressFromDB.trim() !== '') ? addressFromDB : DEFAULT_ADDRESS;
 
         console.log('Adresse à géocoder:', address);
 
-        // Fonction pour afficher un marqueur
+
         function displayMarker(lat, lon, addr, isDefault = false) {
             map.setView([lat, lon], 15);
             var popupText = isDefault
@@ -201,7 +200,7 @@ extract(get_defined_vars(), EXTR_SKIP);
             console.log('Marqueur affiché à:', lat, lon);
         }
 
-        // Géocoder l'adresse
+
         fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address))
             .then(response => response.json())
             .then(data => {
@@ -214,7 +213,7 @@ extract(get_defined_vars(), EXTR_SKIP);
                 } else {
                     console.warn('Adresse non trouvée, tentative avec l\'adresse par défaut');
 
-                    // Si l'adresse n'est pas trouvée ET qu'on n'utilisait pas déjà l'adresse par défaut
+
                     if (address !== DEFAULT_ADDRESS) {
                         fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(DEFAULT_ADDRESS))
                             .then(response => response.json())

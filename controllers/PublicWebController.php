@@ -30,7 +30,6 @@ class PublicWebController extends WebController
 
     function forfait(): string
     {
-        // Récupération des forfaits depuis la base de données
         $forfaits = $this->forfaitModel->getByPrice();
 
         return Template::render("views/global/forfaits.php", [

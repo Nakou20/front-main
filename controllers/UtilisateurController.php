@@ -51,9 +51,31 @@ class UtilisateurController extends WebController
                 $this->redirect('/creer-compte.html');
             }
 
+            if (!empty($numero)) {
+                if (!preg_match('/^\d{8}$/', $numero)) {
+                    SessionHelpers::setFlashMessage('error', 'Le numéro de téléphone doit contenir exactement 8 chiffres.');
+                    $this->redirect('/creer-compte.html');
+                }
+            }
+
             $date = \DateTime::createFromFormat('Y-m-d', $dateNaissance);
             if (!$date || $date->format('Y-m-d') !== $dateNaissance) {
                 SessionHelpers::setFlashMessage('error', 'Format de date invalide. Utilisez le format JJ/MM/AAAA.');
+                $this->redirect('/creer-compte.html');
+            }
+
+            if (strlen($password) < 8) {
+                SessionHelpers::setFlashMessage('error', 'Le mot de passe doit contenir au moins 8 caractères.');
+                $this->redirect('/creer-compte.html');
+            }
+
+            if (!preg_match('/[0-9]/', $password)) {
+                SessionHelpers::setFlashMessage('error', 'Le mot de passe doit contenir au moins 1 chiffre.');
+                $this->redirect('/creer-compte.html');
+            }
+
+            if (!preg_match('/[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\\\/~`]/', $password)) {
+                SessionHelpers::setFlashMessage('error', 'Le mot de passe doit contenir au moins 1 caractère spécial.');
                 $this->redirect('/creer-compte.html');
             }
 
@@ -246,10 +268,6 @@ class UtilisateurController extends WebController
         );
     }
 
-    /**
-     * Code d'activation d'une offre.
-     * Cette méthode permet à l'utilisateur d'activer l'offre choisi (passage de paramètre dans l'URL).
-     */
     public function activerOffre(): string
     {
         $idForfait = $_GET['idforfait'] ?? null;

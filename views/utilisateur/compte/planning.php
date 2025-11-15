@@ -25,7 +25,6 @@
 
         <div class="row">
             <?php
-            // Inclusion de la sidebar pour l'espace compte utilisateur (menu de navigation)
             $page_active = 'planning';
             include '_sidebar_compte.php';
             ?>
@@ -86,7 +85,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
 
-        // Vérifier que l'élément calendrier existe
         if (!calendarEl) {
             console.error('Élément calendar non trouvé');
             return;
@@ -106,7 +104,6 @@
                 right: 'timeGridWeek'
             },
             events: function(info, successCallback, failureCallback) {
-                // Charger les événements via AJAX
                 fetch('/mon-compte/planning.json')
                     .then(response => {
                         if (!response.ok) {
@@ -132,12 +129,10 @@
                 list: 'Liste'
             },
             eventClick: function(info) {
-                // Empêcher le comportement par défaut
                 info.jsEvent.preventDefault();
 
                 console.log('Événement cliqué:', info.event.id);
 
-                // Rediriger vers la page de détails de la leçon
                 if (info.event.id) {
                     window.location.href = '/mon-compte/planning/details_lecon.html?lecon_id=' + info.event.id;
                 } else {
@@ -145,7 +140,6 @@
                 }
             },
             eventMouseEnter: function(info) {
-                // Changer le curseur pour indiquer que c'est cliquable
                 info.el.style.cursor = 'pointer';
             }
         });

@@ -25,7 +25,7 @@ class ResultatModel extends SQL
      */
     public function saveScoreById(int $idEleve, int $score, int $nbquestions): bool
     {
-        // Préparer la requête pour insérer le score
+
         $query = "INSERT INTO resultat (ideleve, dateresultat, score, nbquestions) VALUES (:ideleve, NOW(), :score, :nbquestions)";
         $stmt = $this->getPdo()->prepare($query);
 
@@ -41,15 +41,15 @@ class ResultatModel extends SQL
      */
     public function saveScoreByToken(string $token, int $score, int $nbquestions): bool
     {
-        // Récupération de l'élève par son token
+
         $eleveModel = new EleveModel();
         $eleve = $eleveModel->getByToken($token);
 
         if (!$eleve) {
-            return false; // Si l'élève n'existe pas, retourner false
+            return false;
         }
 
-        // Préparer la requête pour insérer le score
+
         $query = "INSERT INTO resultat (ideleve, dateresultat, score, nbquestions) VALUES (:ideleve, NOW(), :score, :nbquestions)";
         $stmt = $this->getPdo()->prepare($query);
 

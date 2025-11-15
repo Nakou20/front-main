@@ -20,11 +20,11 @@ class SessionHelpers
     {
         if (isset($_SESSION['FLASH'][$key])) {
             $value = $_SESSION['FLASH'][$key];
-            unset($_SESSION['FLASH'][$key]); // Supprimer le message après l'avoir récupéré
+            unset($_SESSION['FLASH'][$key]);
             return $value;
         }
 
-        return null; // Retourne null si le message n'existe pas
+        return null;
     }
 
     static function init(): void
