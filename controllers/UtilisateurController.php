@@ -31,12 +31,11 @@ class UtilisateurController extends WebController
      */
     public function creerCompte(): string
     {
-        // Si l'utilisateur est déjà connecté, redirige vers la page de compte.
         if (SessionHelpers::isLogin()) {
-            $this->redirect('/mon-compte/');
+            $this->redirect('/home');
         }
 
-        // Si la requête est de type POST, traite la soumission du formulaire.
+
         if ($this->isPost()) {
             $nom = $_POST['nom'] ?? null;
             $prenom = $_POST['prenom'] ?? null;
@@ -52,7 +51,6 @@ class UtilisateurController extends WebController
                 $this->redirect('/creer-compte.html');
             }
 
-            // Valider et normaliser le format de la date
             $date = \DateTime::createFromFormat('Y-m-d', $dateNaissance);
             if (!$date || $date->format('Y-m-d') !== $dateNaissance) {
                 SessionHelpers::setFlashMessage('error', 'Format de date invalide. Utilisez le format JJ/MM/AAAA.');
@@ -63,17 +61,14 @@ class UtilisateurController extends WebController
                 SessionHelpers::setFlashMessage('error', 'Les mots de passe ne correspondent pas.');
                 $this->redirect('/creer-compte.html');
             }
-
-            // Récupérer le PEPPER depuis la configuration
             $config = include("configs.php");
             $pepper = $config['PEPPER'];
 
-            // Création de l'élève dans la base de données (en utilisant le modèle EleveModel).
             $hashed_password = password_hash($password.$pepper, PASSWORD_DEFAULT);
             $success = $this->eleveModel->creer_eleve($nom, $prenom, $email, $hashed_password, $dateNaissance, $numero);
 
             if ($success) {
-                $this->redirect('/');
+                $this->redirect('/home');
             } else {
                 SessionHelpers::setFlashMessage('error', "L'adresse email est déjà utilisée ou une erreur est survenue.");
                 $this->redirect('/creer-compte.html');
@@ -97,12 +92,10 @@ class UtilisateurController extends WebController
      */
     public function connexion(): string
     {
-        // Si l'utilisateur est déjà connecté, redirige vers la page de compte.
         if (SessionHelpers::isLogin()) {
             $this->redirect('/mon-compte/');
         }
 
-        // Si la requête est de type POST, traite la soumission du formulaire.
         if ($this->isPost()) {
             $email = $_POST['email'] ?? null;
             $password = $_POST['password'] ?? null;
@@ -112,7 +105,6 @@ class UtilisateurController extends WebController
                 $this->redirect('/connexion.html');
             }
 
-            // Vérification des identifiants de l'utilisateur (en utilisant le modèle EleveModel).
             $eleve = $this->eleveModel->connexion($email, $password.$_ENV['PEPPER']);
 
             if ($eleve) {
@@ -145,22 +137,17 @@ class UtilisateurController extends WebController
                 $this->redirect('/mot-de-passe-oublie.html');
             }
 
-            // Vérifier si un compte existe avec cet email
             $eleve = $this->eleveModel->getByEmail($email);
 
             if ($eleve) {
-                // Créer une demande de réinitialisation avec un token unique
                 $token = $this->demandeReinitialisationModel->createResetRequest($email);
 
                 if ($token) {
-                    // Récupérer l'URL de base depuis la configuration
                     $config = include("configs.php");
                     $baseUrl = $config['URL_BASE'];
 
-                    // Construire le lien de réinitialisation
                     $resetLink = $baseUrl . 'reinitialiser-mot-de-passe.html?token=' . $token;
 
-                    // Envoyer l'email de réinitialisation avec le template
                     $emailSent = EmailUtils::sendEmail(
                         $email,
                         'Réinitialisation de votre mot de passe',
@@ -173,7 +160,6 @@ class UtilisateurController extends WebController
                     if ($emailSent) {
                         SessionHelpers::setFlashMessage('success', 'Un email de réinitialisation a été envoyé à votre adresse.');
                     } else {
-                        // Log l'erreur en mode debug
                         if ($config['DEBUG']) {
                             error_log("Échec de l'envoi d'email de réinitialisation pour: " . $email);
                         }
@@ -183,7 +169,6 @@ class UtilisateurController extends WebController
                     SessionHelpers::setFlashMessage('error', 'Une erreur est survenue. Veuillez réessayer.');
                 }
             } else {
-                // Pour des raisons de sécurité, on affiche le même message même si l'email n'existe pas
                 SessionHelpers::setFlashMessage('success', 'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.');
             }
 
@@ -212,7 +197,6 @@ class UtilisateurController extends WebController
             $this->redirect('/connexion.html');
         }
 
-        // Vérifier la validité du token
         $demande = $this->demandeReinitialisationModel->validateToken($token);
 
         if (!$demande) {
@@ -234,16 +218,13 @@ class UtilisateurController extends WebController
                 $this->redirect('/reinitialiser-mot-de-passe.html?token=' . $token);
             }
 
-            // Récupérer le PEPPER depuis la configuration
             $config = include("configs.php");
             $pepper = $config['PEPPER'];
 
-            // Mettre à jour le mot de passe
             $hashedPassword = password_hash($password . $pepper, PASSWORD_DEFAULT);
             $success = $this->eleveModel->updatePasswordByEmail($demande->emaileleve, $hashedPassword);
 
             if ($success) {
-                // Marquer le token comme utilisé
                 $this->demandeReinitialisationModel->markTokenAsUsed($token);
 
                 SessionHelpers::setFlashMessage('success', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.');

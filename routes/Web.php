@@ -48,10 +48,6 @@ class Web
             Route::Add('/mon-compte/', [$compte, 'monCompte']);
         }
 
-        // Appel la fonction inline dans le routeur.
-        // Utile pour du code très simple, où un tes, l'utilisation d'un contrôleur est préférable.
-        /* Route::Add('/about', function () {
-            return Template::render('views/global/about.php');
-        }); */
+
     }
 }

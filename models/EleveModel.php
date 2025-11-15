@@ -83,9 +83,7 @@ class EleveModel extends SQL
 
         // Exécuter la requête
         if ($stmt->execute($params)) {
-            $this->connexion($email, $motDePasse); // Connexion automatique après création du compte
-
-            // Envoir un email de confirmation (EmailUtils)
+            // Envoyer un email de confirmation (EmailUtils)
             EmailUtils::sendEmail(
                 $email,
                 "Bienvenue chez CDS 49",
