@@ -73,7 +73,7 @@ class UtilisateurController extends WebController
             $success = $this->eleveModel->creer_eleve($nom, $prenom, $email, $hashed_password, $dateNaissance, $numero);
 
             if ($success) {
-                $this->redirect('/mon-compte/');
+                $this->redirect('/');
             } else {
                 SessionHelpers::setFlashMessage('error', "L'adresse email est déjà utilisée ou une erreur est survenue.");
                 $this->redirect('/creer-compte.html');
