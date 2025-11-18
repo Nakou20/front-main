@@ -86,11 +86,21 @@ class UtilisateurController extends WebController
             $config = include("configs.php");
             $pepper = $config['PEPPER'];
 
-            $hashed_password = password_hash($password.$pepper, PASSWORD_BCRYPT);
+            $hashed_password = password_hash($password.$pepper, PASSWORD_BCRYPT,['cost' => 12]);
             $success = $this->eleveModel->creer_eleve($nom, $prenom, $email, $hashed_password, $dateNaissance, $numero);
 
             if ($success) {
-                $this->redirect('/home');
+                // Connecter automatiquement l'utilisateur après la création du compte
+                $eleve = $this->eleveModel->connexion($email, $password.$pepper);
+
+                if ($eleve) {
+                    // Rediriger vers la page de profil
+                    $this->redirect('/mon-compte/profil.html');
+                } else {
+                    // Si la connexion automatique échoue, rediriger vers la page de connexion
+                    SessionHelpers::setFlashMessage('success', 'Votre compte a été créé avec succès. Veuillez vous connecter.');
+                    $this->redirect('/connexion.html');
+                }
             } else {
                 SessionHelpers::setFlashMessage('error', "L'adresse email est déjà utilisée ou une erreur est survenue.");
                 $this->redirect('/creer-compte.html');
