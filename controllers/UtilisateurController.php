@@ -52,7 +52,7 @@ class UtilisateurController extends WebController
             }
 
             if (!empty($numero)) {
-                if (!preg_match('/^\d{8}$/', $numero)) {
+                if (!preg_match('/^\d{10}$/', $numero)) {
                     SessionHelpers::setFlashMessage('error', 'Le numéro de téléphone doit contenir exactement 8 chiffres.');
                     $this->redirect('/creer-compte.html');
                 }
@@ -86,7 +86,7 @@ class UtilisateurController extends WebController
             $config = include("configs.php");
             $pepper = $config['PEPPER'];
 
-            $hashed_password = password_hash($password.$pepper, PASSWORD_DEFAULT);
+            $hashed_password = password_hash($password.$pepper, PASSWORD_BCRYPT);
             $success = $this->eleveModel->creer_eleve($nom, $prenom, $email, $hashed_password, $dateNaissance, $numero);
 
             if ($success) {

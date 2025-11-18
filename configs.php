@@ -8,7 +8,7 @@ $DEBUG = getenv("MVC_DEBUG") ?: true;
 $URL_BASE = getenv("URL_BASE") ?: "http://192.168.100.10/";
 $MAIL_SERVER = getenv("MVC_MAIL_SERVER") ?: "mail.dombtsig.local";
 $FROM_EMAIL = getenv("MVC_FROM_EMAIL") ?: "contact@localhost.fr";
-$PEPPER = getenv("PEPPER") ?: "votre_cle_secrete_pepper_ici_changez_moi";
+$PEPPER = getenv("PEPPER") ?: "supersecretpepperstring";
 
 return array(
     "DB_USER" => $DB_USER,
