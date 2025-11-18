@@ -221,7 +221,7 @@ class EleveModel extends SQL
     public function getByToken(string $token)
     {
 
-        $query = "SELECT ideleve FROM token WHERE token = :token LIMIT 1";
+        $query = "SELECT ideleve, eleve.nomeleve, eleve.prenomeleve, eleve.emaileleve, eleve.dnaissanceeleve FROM token INNER JOIN eleve on token.ideleve = eleve.ideleve WHERE token = :token LIMIT 1";
         $stmt = $this->getPdo()->prepare($query);
         $stmt->execute([':token' => $token]);
         $result = $stmt->fetch();
