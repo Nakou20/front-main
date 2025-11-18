@@ -127,7 +127,10 @@ class UtilisateurController extends WebController
                 $this->redirect('/connexion.html');
             }
 
-            $eleve = $this->eleveModel->connexion($email, $password.$_ENV['PEPPER']);
+            $config = include("configs.php");
+            $pepper = $config['PEPPER'];
+
+            $eleve = $this->eleveModel->connexion($email, $password.$pepper);
 
             if ($eleve) {
                 $this->redirect('/mon-compte/');
@@ -232,6 +235,21 @@ class UtilisateurController extends WebController
 
             if (empty($password) || empty($confirmPassword)) {
                 SessionHelpers::setFlashMessage('error', 'Tous les champs sont requis.');
+                $this->redirect('/reinitialiser-mot-de-passe.html?token=' . $token);
+            }
+
+            if (strlen($password) < 8) {
+                SessionHelpers::setFlashMessage('error', 'Le mot de passe doit contenir au moins 8 caractères.');
+                $this->redirect('/reinitialiser-mot-de-passe.html?token=' . $token);
+            }
+
+            if (!preg_match('/[0-9]/', $password)) {
+                SessionHelpers::setFlashMessage('error', 'Le mot de passe doit contenir au moins 1 chiffre.');
+                $this->redirect('/reinitialiser-mot-de-passe.html?token=' . $token);
+            }
+
+            if (!preg_match('/[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\\\/~`]/', $password)) {
+                SessionHelpers::setFlashMessage('error', 'Le mot de passe doit contenir au moins 1 caractère spécial.');
                 $this->redirect('/reinitialiser-mot-de-passe.html?token=' . $token);
             }
 

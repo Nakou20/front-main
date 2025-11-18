@@ -24,7 +24,14 @@
                         <div class="mb-3">
                             <label for="password" class="form-label">Nouveau mot de passe</label>
                             <input type="password" class="form-control" id="password" name="password" required minlength="8">
-                            <small class="form-text text-muted">Le mot de passe doit contenir au moins 8 caractères.</small>
+                            <small class="form-text text-muted">
+                                Le mot de passe doit contenir au moins :
+                                <ul class="mb-0">
+                                    <li>8 caractères</li>
+                                    <li>1 chiffre</li>
+                                    <li>1 caractère spécial</li>
+                                </ul>
+                            </small>
                         </div>
 
                         <div class="mb-3">
