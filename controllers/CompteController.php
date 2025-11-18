@@ -42,7 +42,7 @@ class CompteController extends WebController
             $prenom = $_POST['prenom'] ?? null;
             $email = $_POST['email'] ?? null;
             $dateNaissance = $_POST['datenaissance'] ?? null;
-            $numero = $_POST['numeroeleve'] ?? null;
+            $numeroeleve = $_POST['numeroeleve'] ?? null;
             if (empty($nom) || empty($prenom) || empty($email) || empty($dateNaissance)) {
                 SessionHelpers::setFlashMessage('error', 'Tous les champs sont requis.');
                 $this->redirect('/mon-compte/profil.html');
@@ -55,7 +55,7 @@ class CompteController extends WebController
                 $email,
                 $dateNaissance,
                 null,
-                $numero
+                $numeroeleve
             );
 
             if ($success) {
