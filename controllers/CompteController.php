@@ -9,6 +9,8 @@ use utils\SessionHelpers;
 use controllers\base\WebController;
 use models\ConduireModel;
 use models\ResultatModel;
+use models\DemandeModel;
+use utils\EmailUtils;
 
 class CompteController extends WebController
 {
@@ -16,6 +18,7 @@ class CompteController extends WebController
     private InscrireModel $inscrireModel;
     private ConduireModel $conduireModel;
     private ResultatModel $resultatModel;
+    private DemandeModel $demandeModel;
 
     public function __construct()
     {
@@ -23,6 +26,7 @@ class CompteController extends WebController
         $this->inscrireModel = new InscrireModel();
         $this->conduireModel = new ConduireModel();
         $this->resultatModel = new ResultatModel();
+        $this->demandeModel = new DemandeModel();
     }
 
     /**
@@ -280,6 +284,77 @@ class CompteController extends WebController
                 'eleve' => $eleveConnecte,
                 'tri' => $orderBy,
                 'ordre' => $orderDirection,
+                'error' => SessionHelpers::getFlashMessage('error'),
+                'success' => SessionHelpers::getFlashMessage('success')
+            ]
+        );
+    }
+
+    /**
+     * Demande des heures supplémentaires
+     */
+    public function demanderHeuresSupplementaires(): string
+    {
+        $eleveConnecte = SessionHelpers::getConnected();
+        $idEleve = $eleveConnecte['ideleve'];
+
+        $aDemandeEnAttente = $this->demandeModel->aDemandeEnAttente($idEleve);
+
+        if ($this->isPost()) {
+            $commentaire = $_POST['commentaire'] ?? '';
+
+            if (empty($commentaire)) {
+                SessionHelpers::setFlashMessage('error', 'Veuillez remplir le commentaire pour expliquer votre besoin.');
+                $this->redirect('/mon-compte/demander-heures-supplementaires.html');
+            }
+
+            if ($aDemandeEnAttente) {
+                SessionHelpers::setFlashMessage('error', 'Vous avez déjà une demande en attente de traitement.');
+                $this->redirect('/mon-compte/demander-heures-supplementaires.html');
+            }
+
+            // Créer la demande
+            $demandeId = $this->demandeModel->creerDemandeHeuresSupplementaires($idEleve, $commentaire);
+
+            if ($demandeId) {
+                // Envoyer un email de confirmation à l'élève
+                $eleve = $this->eleveModel->getMe();
+
+                SessionHelpers::setFlashMessage('success', 'Votre demande d\'heures supplémentaires a été envoyée avec succès. Un email de confirmation vous a été envoyé.');
+                $this->redirect('/mon-compte/planning.html');
+            } else {
+                SessionHelpers::setFlashMessage('error', 'Une erreur est survenue lors de l\'envoi de votre demande.');
+                $this->redirect('/mon-compte/demander-heures-supplementaires.html');
+            }
+        }
+
+        return Template::render(
+            "views/utilisateur/compte/demander-heures-supplementaires.php",
+            [
+                'titre' => 'Demander des heures supplémentaires',
+                'error' => SessionHelpers::getFlashMessage('error'),
+                'success' => SessionHelpers::getFlashMessage('success'),
+                'aDemandeEnAttente' => $aDemandeEnAttente
+            ]
+        );
+    }
+
+    /**
+     * Affiche l'historique des demandes d'heures supplémentaires
+     */
+    public function mesDemandes(): string
+    {
+        $eleveConnecte = SessionHelpers::getConnected();
+        $idEleve = $eleveConnecte['ideleve'];
+
+        $demandes = $this->demandeModel->getDemandesEleve($idEleve);
+
+        return Template::render(
+            "views/utilisateur/compte/mes-demandes.php",
+            [
+                'titre' => 'Mes demandes',
+                'demandes' => $demandes,
+                'eleve' => $eleveConnecte,
                 'error' => SessionHelpers::getFlashMessage('error'),
                 'success' => SessionHelpers::getFlashMessage('success')
             ]
