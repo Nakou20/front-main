@@ -16,12 +16,14 @@ class UtilisateurController extends WebController
     private EleveModel $eleveModel;
     private ForfaitModel $forfaitModel;
     private DemandeReinitialisationModel $demandeReinitialisationModel;
+    private InscrireModel $inscrireModel;
 
     function __construct()
     {
         $this->eleveModel = new EleveModel();
         $this->forfaitModel = new ForfaitModel();
         $this->demandeReinitialisationModel = new DemandeReinitialisationModel();
+        $this->inscrireModel = new InscrireModel();
     }
 
     /**
@@ -44,6 +46,7 @@ class UtilisateurController extends WebController
             $confirmPassword = $_POST['confirm_password'] ?? null;
             $dateNaissance = $_POST['date_naissance'] ?? null;
             $numero = $_POST['numeroeleve'] ?? null;
+            $idForfait = $_POST['idforfait'] ?? null;
 
             if (empty($nom) || empty($prenom) || empty($email) || empty($password) || empty($confirmPassword) || empty($dateNaissance)) 
             {
@@ -94,6 +97,19 @@ class UtilisateurController extends WebController
                 $eleve = $this->eleveModel->connexion($email, $password.$pepper);
 
                 if ($eleve) {
+                    // Si un forfait a été sélectionné, l'activer automatiquement
+                    if (!empty($idForfait)) {
+                        $forfaitActive = $this->inscrireModel->activerForfait($eleve['ideleve'], $idForfait);
+
+                        if ($forfaitActive) {
+                            // Récupérer les informations du forfait pour le message
+                            $forfait = $this->forfaitModel->getById($idForfait);
+                            SessionHelpers::setFlashMessage('success', "Votre compte a été créé avec succès. Le forfait \"{$forfait->libelleforfait}\" a été activé sur votre compte.");
+                        } else {
+                            SessionHelpers::setFlashMessage('warning', 'Votre compte a été créé avec succès, mais une erreur est survenue lors de l\'activation du forfait.');
+                        }
+                    }
+
                     // Rediriger vers la page de profil
                     $this->redirect('/mon-compte/profil.html');
                 } else {
@@ -112,7 +128,8 @@ class UtilisateurController extends WebController
             [
                 'titre' => 'Créer un compte',
                 'error' => SessionHelpers::getFlashMessage('error'),
-                'success' => SessionHelpers::getFlashMessage('success')
+                'success' => SessionHelpers::getFlashMessage('success'),
+                'forfaits' => $this->forfaitModel->getAll()
             ]
         );
     }
@@ -143,6 +160,14 @@ class UtilisateurController extends WebController
             $eleve = $this->eleveModel->connexion($email, $password.$pepper);
 
             if ($eleve) {
+
+                $hasForfait = $this->inscrireModel->hasForfaitActif($eleve['ideleve']);
+
+                if (!$hasForfait) {
+                    SessionHelpers::setFlashMessage('warning', 'Vous devez choisir un forfait pour commencer votre formation.');
+                    $this->redirect('/forfaits.html');
+                }
+
                 $this->redirect('/mon-compte/');
             } else {
                 SessionHelpers::setFlashMessage('error', 'Identifiants incorrects.');
@@ -298,18 +323,52 @@ class UtilisateurController extends WebController
 
     public function activerOffre(): string
     {
+        // Si l'utilisateur n'est pas connecté, rediriger vers la connexion
+        if (!SessionHelpers::isLogin()) {
+            SessionHelpers::setFlashMessage('error', 'Vous devez être connecté pour activer une offre.');
+            $this->redirect('/connexion.html');
+        }
+
         $idForfait = $_GET['idforfait'] ?? null;
+
+        if (!$idForfait) {
+            $this->redirect('/forfaits.html');
+        }
 
         $forfait = $this->forfaitModel->getById($idForfait);
 
         if (!$forfait) {
+            SessionHelpers::setFlashMessage('error', 'Le forfait sélectionné n\'existe pas.');
             $this->redirect('/forfaits.html');
         }
 
+        // Vérifier si l'élève a déjà un forfait actif
+        $eleveConnecte = SessionHelpers::getConnected();
+        $hasForfait = $this->inscrireModel->hasForfaitActif($eleveConnecte['ideleve']);
+
+        if ($hasForfait) {
+            SessionHelpers::setFlashMessage('error', 'Vous êtes déjà inscrit à un forfait. Pour changer de forfait, veuillez vous rapprocher de CDS49.');
+            $this->redirect('/mon-compte/planning.html');
+        }
+
+        // Si c'est une requête POST, activer le forfait
+        if ($this->isPost()) {
+            $forfaitActive = $this->inscrireModel->activerForfait($eleveConnecte['ideleve'], $idForfait);
+
+            if ($forfaitActive) {
+                SessionHelpers::setFlashMessage('success', "Le forfait \"{$forfait->libelleforfait}\" a été activé avec succès sur votre compte !");
+                $this->redirect('/mon-compte/planning.html');
+            } else {
+                SessionHelpers::setFlashMessage('error', 'Une erreur est survenue lors de l\'activation du forfait. Veuillez réessayer.');
+                $this->redirect('/forfaits.html');
+            }
+        }
+
         return Template::render(
-            "views/utilisateur/activer-offre.php",
+            "views/global/activer-offre.php",
             [
                 'titre' => 'Activer une offre',
+                'forfait' => $forfait,
                 'error' => SessionHelpers::getFlashMessage('error'),
                 'success' => SessionHelpers::getFlashMessage('success')
             ]

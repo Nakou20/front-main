@@ -5,6 +5,7 @@ namespace controllers;
 use utils\Template;
 use models\ForfaitModel;
 use controllers\base\WebController;
+use utils\SessionHelpers;
 
 class PublicWebController extends WebController
 {
@@ -33,7 +34,10 @@ class PublicWebController extends WebController
         $forfaits = $this->forfaitModel->getByPrice();
 
         return Template::render("views/global/forfaits.php", [
-            'forfaits' => $forfaits
+            'forfaits' => $forfaits,
+            'error' => SessionHelpers::getFlashMessage('error'),
+            'success' => SessionHelpers::getFlashMessage('success'),
+            'warning' => SessionHelpers::getFlashMessage('warning')
         ]);
     }
 }

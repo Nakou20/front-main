@@ -61,6 +61,31 @@
                         <label for="date_naissance" class="form-label">Date de naissance</label>
                         <input type="date" class="form-control" id="date_naissance" name="date_naissance" required>
                     </div>
+                    <div class="mb-3">
+                        <label for="idforfait" class="form-label">Sélectionner un forfait (optionnel)</label>
+                        <select class="form-control" id="idforfait" name="idforfait">
+                            <option value="">-- Aucun forfait pour le moment --</option>
+                            <?php if (isset($forfaits) && !empty($forfaits)) { ?>
+                                <?php foreach ($forfaits as $forfait) { ?>
+                                    <option value="<?= $forfait['idforfait']; ?>">
+                                        <?= htmlspecialchars($forfait['libelleforfait']); ?> -
+                                        <?php
+                                        if ($forfait['prixforfait']) {
+                                            echo $forfait['prixforfait'] . " €";
+                                        } elseif ($forfait['prixhoraire']) {
+                                            echo $forfait['prixhoraire'] . " € / heure";
+                                        } else {
+                                            echo "Prix sur demande";
+                                        }
+                                        ?>
+                                    </option>
+                                <?php } ?>
+                            <?php } ?>
+                        </select>
+                        <small class="form-text text-muted">
+                            Vous pouvez sélectionner un forfait maintenant ou le faire plus tard depuis votre espace personnel.
+                        </small>
+                    </div>
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">Créer mon compte</button>
                     </div>

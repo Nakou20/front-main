@@ -4,6 +4,24 @@
         <p class="lead text-muted">Des solutions adaptées à chaque besoin pour obtenir votre permis.</p>
     </header>
 
+    <?php if (!empty($error)) { ?>
+        <div class="alert alert-danger" role="alert">
+            <?= htmlspecialchars($error) ?>
+        </div>
+    <?php } ?>
+
+    <?php if (!empty($success)) { ?>
+        <div class="alert alert-success" role="alert">
+            <?= htmlspecialchars($success) ?>
+        </div>
+    <?php } ?>
+
+    <?php if (!empty($warning)) { ?>
+        <div class="alert alert-warning" role="alert">
+            <?= htmlspecialchars($warning) ?>
+        </div>
+    <?php } ?>
+
     <section id="nos-forfaits" class="py-5">
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
             
