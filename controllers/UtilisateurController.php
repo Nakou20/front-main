@@ -68,12 +68,12 @@ class UtilisateurController extends WebController
                 SessionHelpers::setFlashMessage('error', 'Le mot de passe doit contenir au moins 8 caractères.');
                 $this->redirect('/creer-compte.html');
             }
-
+            
             if (!preg_match('/[0-9]/', $password)) {
                 SessionHelpers::setFlashMessage('error', 'Le mot de passe doit contenir au moins 1 chiffre.');
                 $this->redirect('/creer-compte.html');
             }
-
+            
             if (!preg_match('/[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\\\/~`]/', $password)) {
                 SessionHelpers::setFlashMessage('error', 'Le mot de passe doit contenir au moins 1 caractère spécial.');
                 $this->redirect('/creer-compte.html');

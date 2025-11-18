@@ -59,4 +59,23 @@ class ResultatModel extends SQL
             ':nbquestions' => $nbquestions
         ]);
     }
+
+    public function getResultatsByEleve(int $idEleve, string $orderBy = 'date', string $orderDirection = 'DESC'): array
+    {
+        $allowedColumns = ['dateresultat' => 'dateresultat', 'score' => 'score', 'date' => 'dateresultat'];
+        $allowedDirections = ['ASC', 'DESC'];
+
+        $column = $allowedColumns[$orderBy] ?? 'dateresultat';
+        $direction = in_array(strtoupper($orderDirection), $allowedDirections) ? strtoupper($orderDirection) : 'DESC';
+
+        $query = "SELECT idresultat, ideleve, dateresultat, score, nbquestions 
+                  FROM resultat 
+                  WHERE ideleve = :ideleve 
+                  ORDER BY {$column} {$direction}";
+
+        $stmt = $this->getPdo()->prepare($query);
+        $stmt->execute([':ideleve' => $idEleve]);
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

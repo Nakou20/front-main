@@ -7,6 +7,7 @@
     <div class="collapse d-md-block" id="sidebarMenu">
         <div class="list-group">
             <a href="/mon-compte/planning.html" class="list-group-item list-group-item-action <?php echo (isset($page_active) && $page_active === 'planning') ? 'active' : ''; ?>">Planning des passages</a>
+            <a href="/mon-compte/mes-resultats.html" class="list-group-item list-group-item-action <?php echo (isset($page_active) && $page_active === 'resultats') ? 'active' : ''; ?>">Mes Résultats</a>
             <a href="/mon-compte/profil.html" class="list-group-item list-group-item-action <?php echo (isset($page_active) && $page_active === 'profil') ? 'active' : ''; ?>">Gestion du profil</a>
         </div>
     </div>

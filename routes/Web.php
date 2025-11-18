@@ -44,6 +44,7 @@ class Web
             Route::Add('/mon-compte/planning.json', [$compte, 'getPlanningJson']);
             Route::Add('/mon-compte/planning/details_lecon.html', [$compte, 'detailsLecon']);
             Route::Add('/mon-compte/planning/annuler_lecon.html', [$compte, 'annulerLecon']);
+            Route::Add('/mon-compte/mes-resultats.html', [$compte, 'mesResultats']);
             Route::Add('/mon-compte/profil.html', [$compte, 'mesInformations']);
             Route::Add('/mon-compte/', [$compte, 'monCompte']);
         }

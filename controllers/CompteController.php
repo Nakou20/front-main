@@ -8,26 +8,29 @@ use models\InscrireModel;
 use utils\SessionHelpers;
 use controllers\base\WebController;
 use models\ConduireModel;
+use models\ResultatModel;
 
 class CompteController extends WebController
 {
     private EleveModel $eleveModel;
     private InscrireModel $inscrireModel;
     private ConduireModel $conduireModel;
+    private ResultatModel $resultatModel;
 
     public function __construct()
     {
         $this->eleveModel = new EleveModel();
         $this->inscrireModel = new InscrireModel();
         $this->conduireModel = new ConduireModel();
+        $this->resultatModel = new ResultatModel();
     }
 
     /**
      * Affiche le compte utilisateur.
      *
-     * @return string
+     * @return void
      */
-    public function monCompte(): string
+    public function monCompte(): void
     {
         $this->redirect('/mon-compte/planning.html');
     }
@@ -195,7 +198,7 @@ class CompteController extends WebController
     /**
      * Annule une leçon
      */
-    public function annulerLecon(): string
+    public function annulerLecon(): void
     {
         if (!$this->isPost()) {
             $this->redirect('/mon-compte/planning.html');
@@ -257,5 +260,29 @@ class CompteController extends WebController
         }
 
         $this->redirect('/mon-compte/planning.html');
+    }
+
+    public function mesResultats(): string
+    {
+        $eleveConnecte = SessionHelpers::getConnected();
+        $idEleve = $eleveConnecte['ideleve'];
+
+        $orderBy = $_GET['tri'] ?? 'date';
+        $orderDirection = $_GET['ordre'] ?? 'DESC';
+
+        $resultats = $this->resultatModel->getResultatsByEleve($idEleve, $orderBy, $orderDirection);
+
+        return Template::render(
+            "views/utilisateur/compte/mes-resultats.php",
+            [
+                'titre' => 'Mes Résultats',
+                'resultats' => $resultats,
+                'eleve' => $eleveConnecte,
+                'tri' => $orderBy,
+                'ordre' => $orderDirection,
+                'error' => SessionHelpers::getFlashMessage('error'),
+                'success' => SessionHelpers::getFlashMessage('success')
+            ]
+        );
     }
 }
