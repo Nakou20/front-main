@@ -36,13 +36,30 @@ class MobileApiController extends ApiController
      */
     function login()
     {
-        if (!$this->isPost()) {
-            return $this->errorResponse('Méthode non autorisée', 405);
+        // Autoriser CORS immédiatement
+        $this->allowCORS();
+
+        // Debug minimal
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN';
+        $headers = function_exists('getallheaders') ? getallheaders() : [];
+        error_log("API /api/login called - method: {$method} - headers: " . json_encode($headers));
+
+        // Répondre au preflight CORS
+        if ($method === 'OPTIONS') {
+            return $this->successResponse('OK');
         }
 
-        // Lire les données JSON du corps de la requête
+        // Vérifier que c'est bien un POST
+        if (!$this->isPost()) {
+            return $this->errorResponse('Méthode non autorisée: ' . $method, 405);
+        }
+
+        // Lire le corps JSON, fallback sur $_POST si nécessaire
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
+        if (!is_array($data) || empty($data)) {
+            $data = $_POST ?: [];
+        }
 
         $email = $data['email'] ?? null;
         $password = $data['password'] ?? null;
@@ -50,6 +67,7 @@ class MobileApiController extends ApiController
         if (empty($email) || empty($password)) {
             return $this->errorResponse('Email et mot de passe requis', 400);
         }
+
         $token = bin2hex(random_bytes(16));
         $user = $this->eleveModel->connexion($email, $password, $token);
 
