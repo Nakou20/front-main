@@ -28,6 +28,57 @@ class MobileApiController extends ApiController
     {
         return $this->redirect('/documentation-api.html');
     }
+    /**
+    * path: /api/register
+    * method: POST
+    * Inscription d'un nouvel élève via l'application mobile.
+    */
+    function Inscription()
+    {
+        if (!$this->isPost()) {
+            return $this->errorResponse('Méthode non autorisée', 405);
+        }
+
+        // Lire les données JSON envoyées par l'app mobile
+        $data = $this->getJsonData();
+
+        $nom = $data['nom'] ?? null;
+        $prenom = $data['prenom'] ?? null;
+        $email = $data['email'] ?? null;
+        $numero = $data['numero'] ?? null;
+        $password = $data['password'] ?? null;
+        $confirmPassword = $data['confirm_password'] ?? null;
+        $dateNaissance = $data['date_naissance'] ?? null;
+
+        // Vérification des champs obligatoires
+        if (empty($nom) || empty($prenom) || empty($email) || empty($password) || empty($confirmPassword) || empty($dateNaissance)) {
+            return $this->errorResponse('Tous les champs sont requis', 400);
+        }
+
+        if ($password !== $confirmPassword) {
+            return $this->errorResponse('Les mots de passe ne correspondent pas', 400);
+        }
+
+        // Hash du mot de passe
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        // Création de l'élève
+        $success = $this->eleveModel->creer_eleve($nom, $prenom, $email, $numero, $hashedPassword, $dateNaissance);
+
+        if ($success) {
+            // On peut générer un token directement pour connecter l'élève après inscription
+            $token = bin2hex(random_bytes(16));
+            $user = $this->eleveModel->connexion($email, $password, $token);
+
+            return $this->successResponse('Inscription réussie', [
+                'user' => $user,
+                'token' => $token
+            ]);
+        } else {
+            return $this->errorResponse("L'adresse email est déjà utilisée ou une erreur est survenue", 409);
+        }
+    }
+
 
     /**
      * path: /api/login
@@ -220,6 +271,27 @@ class MobileApiController extends ApiController
             return $this->successResponse('Score sauvegardé avec succès');
         } else {
             return $this->errorResponse('Échec de la sauvegarde du score', 500);
+        }
+    }
+    public function getScores()
+    {
+        if ($this->isPost()) {
+            return $this->errorResponse('Méthode non autorisée', 405);
+        }
+
+        // Récupération depuis l'en-tête (Bearer token), on ne garde que le token
+        $token = $this->getAuthToken();
+
+        if (empty($token)) {
+            return $this->errorResponse('Token requis', 401);
+        }
+
+        $scores = $this->resultatModel->getResultatByToken($token);
+
+        if ($scores !== false) {
+            return $this->successResponse('Scores récupérés avec succès', ['scores' => $scores]);
+        } else {
+            return $this->errorResponse('Échec de la récupération des scores', 500);
         }
     }
 }

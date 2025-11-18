@@ -78,4 +78,16 @@ class ResultatModel extends SQL
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function getResultatByToken(string $token): array
+    {
+        $eleveModel = new EleveModel();
+        $eleve = $eleveModel->getByToken($token);
+
+        if (!$eleve) {
+            return [];
+        }
+
+        return $this->getResultatsByEleve($eleve['ideleve']);
+    }
 }
