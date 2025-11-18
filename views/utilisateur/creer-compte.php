@@ -38,11 +38,24 @@
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Mot de passe</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" title="Afficher/Masquer le mot de passe">
+                                <i class="fas fa-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
+                        <small class="form-text text-muted">
+                            Minimum 8 caractères, 1 chiffre et 1 caractère spécial requis.
+                        </small>
                     </div>
                     <div class="mb-3">
                         <label for="confirm-password" class="form-label">Confirmer le mot de passe</label>
-                        <input type="password" class="form-control" id="confirm-password" name="confirm_password" required>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="confirm-password" name="confirm_password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword" title="Afficher/Masquer le mot de passe">
+                                <i class="fas fa-eye" id="toggleConfirmIcon"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="date_naissance" class="form-label">Date de naissance</label>
@@ -59,3 +72,37 @@
         </div>
     </section>
 </main>
+
+<script>
+    // Gestion de l'affichage/masquage du mot de passe
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordField = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    });
+
+    // Gestion de l'affichage/masquage du mot de passe de confirmation
+    document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+        const confirmPasswordField = document.getElementById('confirm-password');
+        const toggleConfirmIcon = document.getElementById('toggleConfirmIcon');
+
+        if (confirmPasswordField.type === 'password') {
+            confirmPasswordField.type = 'text';
+            toggleConfirmIcon.classList.remove('fa-eye');
+            toggleConfirmIcon.classList.add('fa-eye-slash');
+        } else {
+            confirmPasswordField.type = 'password';
+            toggleConfirmIcon.classList.remove('fa-eye-slash');
+            toggleConfirmIcon.classList.add('fa-eye');
+        }
+    });
+</script>
