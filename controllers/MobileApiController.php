@@ -36,22 +36,10 @@ class MobileApiController extends ApiController
      */
     function login()
     {
-        // Autoriser CORS immédiatement
-        $this->allowCORS();
-
-        // Debug minimal
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN';
-        $headers = function_exists('getallheaders') ? getallheaders() : [];
-        error_log("API /api/login called - method: {$method} - headers: " . json_encode($headers));
-
-        // Répondre au preflight CORS
-        if ($method === 'OPTIONS') {
-            return $this->successResponse('OK');
-        }
 
         // Vérifier que c'est bien un POST
         if (!$this->isPost()) {
-            return $this->errorResponse('Méthode non autorisée: ' . $method, 405);
+            return $this->errorResponse('Méthode non autorisée: ' , 405);
         }
 
         // Lire le corps JSON, fallback sur $_POST si nécessaire
