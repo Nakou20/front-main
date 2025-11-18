@@ -62,6 +62,31 @@
                     </div>
                     <!-- Fin Section Forfait Actif -->
 
+                    <!-- Section Demande d'heures supplémentaires -->
+                    <?php if ($forfait) { ?>
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-plus-circle text-primary"></i> Besoin de plus d'heures ?
+                                        </h5>
+                                        <p class="text-muted mb-0 mt-2">Demandez des heures supplémentaires pour compléter votre formation</p>
+                                    </div>
+                                    <div>
+                                        <a href="/mon-compte/demander-heures-supplementaires.html" class="btn btn-primary">
+                                            <i class="fas fa-clock"></i> Demander des heures supplémentaires
+                                        </a>
+                                        <a href="/mon-compte/mes-demandes.html" class="btn btn-outline-secondary">
+                                            <i class="fas fa-list"></i> Mes demandes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php } ?>
+                    <!-- Fin Section Demande d'heures supplémentaires -->
+
                     <?php if ($forfait) { ?>
                         <div>
                             <h2 class="display-5 mb-3">Planning des passages</h2>

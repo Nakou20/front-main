@@ -53,7 +53,7 @@ class UtilisateurController extends WebController
 
             if (!empty($numero)) {
                 if (!preg_match('/^\d{10}$/', $numero)) {
-                    SessionHelpers::setFlashMessage('error', 'Le numéro de téléphone doit contenir exactement 8 chiffres.');
+                    SessionHelpers::setFlashMessage('error', 'Le numéro de téléphone doit contenir exactement 10 chiffres.');
                     $this->redirect('/creer-compte.html');
                 }
             }

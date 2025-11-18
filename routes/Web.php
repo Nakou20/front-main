@@ -46,6 +46,8 @@ class Web
             Route::Add('/mon-compte/planning/annuler_lecon.html', [$compte, 'annulerLecon']);
             Route::Add('/mon-compte/mes-resultats.html', [$compte, 'mesResultats']);
             Route::Add('/mon-compte/profil.html', [$compte, 'mesInformations']);
+            Route::Add('/mon-compte/demander-heures-supplementaires.html', [$compte, 'demanderHeuresSupplementaires']);
+            Route::Add('/mon-compte/mes-demandes.html', [$compte, 'mesDemandes']);
             Route::Add('/mon-compte/', [$compte, 'monCompte']);
         }
 
