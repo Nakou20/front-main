@@ -45,9 +45,6 @@ class MobileApiController extends ApiController
         // Lire le corps JSON, fallback sur $_POST si nécessaire
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
-        if (!is_array($data) || empty($data)) {
-            $data = $_POST ?: [];
-        }
 
         $email = $data['email'] ?? null;
         $password = $data['password'] ?? null;
