@@ -51,14 +51,14 @@ class Route
                     $target = $_SERVER["REQUEST_URI"];
                 }
             } else {
-
+                // PHP 8.3 and below
                 $target = $_SERVER['REQUEST_URI'];
             }
 
             $target = parse_url($target, PHP_URL_PATH);
         }
 
-
+        // Gestion si le path ne commence pas par /
         if (!str_starts_with($target, "/")) {
             $target = "/" . $target;
         }
@@ -112,17 +112,34 @@ class Route
     {
         $isBrowser = CliUtils::isBrowser();
 
+        // Gestion de la requête source à charger.
         $target = $isBrowser ? Route::GetCurrentPath() : Route::GetCommands();
 
+        // Gestion des paramètres
         $args = $isBrowser ? array_merge($_GET, $_POST) : Route::getArgs();
         unset($args["path"]);
 
+        // Trouve la route avec le bon pattern (expression régulière avec gestion des paramètres dans l'URL)
         $matches = self::searchForMatchingRoute($target);
 
+        // Est-ce que la page demandée est autorisée.
         if ($matches) {
 
-            $match = $matches[0];
+            // Si la requête est de type OPTIONS, on répond juste OK (CORS preflight)
+            if ($isBrowser && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+                // Ajout en-têtes CORS
+                header("Access-Control-Allow-Origin: *");
+                header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+                header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization");
 
+                // Réponse vide avec code 200
+                http_response_code(200);
+                exit();
+            }
+
+            $match = $matches[0];
+            // Extraction des paramètres présents dans la route, pour les mettre
+            // dans la liste des arguments passé à la méthode.
             foreach (array_keys($matches[1]) as $inPathParameters) {
                 if (is_string($inPathParameters)) {
                     $args[$inPathParameters] = $matches[1][$inPathParameters][0];
@@ -145,6 +162,9 @@ class Route
                 die($e);
             }
 
+            // Obtention des paramètres réels de la méthode
+            // Création d'un tableau d'argument qui sera passé à la méthode
+            // pour ne l'appeler qu'avec les paramètres nécessaires, ou null si pas dispo
             $callArgs = [];
             foreach ($refMeth->getParameters() as $methParams) {
 
@@ -154,14 +174,18 @@ class Route
                     $callArgs[$methParams->getName()] = $args[$methParams->getPosition()] ?? null;
                 }
 
+                // Si le paramètre est optionel, alors on le retire pour que
+                // celui par défaut dans la méthode soit affiché.
                 if ($methParams->isOptional() && $callArgs[$methParams->getName()] == null) {
                     unset($callArgs[$methParams->getName()]);
                 }
             }
 
+            // Appel dynamique de la méthode souhaitée (déclaré dans les routes)
+            // Les paramètres de la méthode sont automatiquement remplis avec les valeurs en provenence du GET, POST ou de l'URL
             echo call_user_func_array(Route::$routes[$match], $callArgs);
         } else if ($isBrowser) {
-
+            // Non affichage d'une 404.
             http_response_code(404);
             include('views/common/404.php');
         } else {
@@ -169,3 +193,4 @@ class Route
         }
     }
 }
+
